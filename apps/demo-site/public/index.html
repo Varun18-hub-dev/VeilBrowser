@@ -133,6 +133,7 @@
     .agent-new-task { display: none; margin-top: 13px; background: #fff; color: #2563eb; border: 1px solid #93c5fd; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
     .agent-new-task.visible { display: inline-block; }
     .developer-only { display: none !important; }
+    .privacy-fixtures { display: none !important; }
   </style>
 </head>
 <body>
@@ -206,7 +207,7 @@
       </div>
     </div>
 
-    <!-- EXISTING SYNTHETIC PORTAL SECTIONS (UNCHANGED)                   -->
+    <!-- Simple user-facing browser page. Privacy test fixtures remain in the DOM but are hidden. -->
     <!-- ================================================================ -->
 
     <div class="header-section">
@@ -214,6 +215,23 @@
       <p>Manage your account personal details and security configuration.</p>
     </div>
 
+    <div class="card" id="notification-settings-section">
+      <h2 class="card-title">Notification Preferences</h2>
+      <div class="toggle-group">
+        <input type="checkbox" id="email-notif-toggle" name="email_notifications" />
+        <label for="email-notif-toggle">Enable email notifications for security alerts</label>
+      </div>
+      <div class="toggle-group">
+        <input type="checkbox" id="product-updates-toggle" name="product_updates" checked />
+        <label for="product-updates-toggle">Receive weekly product feature highlights</label>
+      </div>
+      <div style="margin-top: 16px; display: flex; gap: 12px;">
+        <button type="button" id="save-preferences-btn" class="btn btn-primary">Save Preferences</button>
+        <button type="button" id="go-to-dashboard-btn" class="btn btn-secondary">Go to Dashboard</button>
+      </div>
+    </div>
+
+    <div class="privacy-fixtures" aria-hidden="true">
     <!-- Section 1: Personal Details (PII Fields) -->
     <div class="card">
       <h2 class="card-title">Personal Information</h2>
@@ -352,7 +370,8 @@
         </div>
       </div>
     </div>
-  </div>
+
+    </div>  </div>
 
   <script>
     // ================================================================
