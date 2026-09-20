@@ -28,6 +28,20 @@ chrome.runtime.onMessage.addListener(
     sender: chrome.runtime.MessageSender,
     sendResponse: (response: unknown) => void
   ): boolean | undefined => {
+    if (message.type === 'RUN_AGENT_TASK_FROM_PANEL') {
+      const targetTabId =
+        typeof (message as { targetTabId?: unknown }).targetTabId === 'number'
+          ? (message as { targetTabId: number }).targetTabId
+          : sender.tab?.id;
+
+      if (typeof targetTabId === 'number') {
+        chrome.tabs.sendMessage(targetTabId, message).catch((err: unknown) => {
+          console.error('[VeilBrowse:background] Failed to reach active tab:', err);
+        });
+      }
+      return undefined;
+    }
+
     if (message.type === 'DOM_SCAN_RESULT') {
       handleDomScanResult(message as DomScanResultMessage, sender);
       sendResponse({ ok: true });
