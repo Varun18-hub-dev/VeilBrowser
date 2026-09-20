@@ -77,100 +77,62 @@
       padding: 12px 16px; font-size: 0.85rem; color: #1e40af; margin-bottom: 24px;
     }
 
-    /* ====== AGENT PANEL STYLES ====== */
+    /* ====== USER-FACING AGENT UI ====== */
     .agent-panel {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-      border: 2px solid #3b82f6; border-radius: 12px;
-      padding: 28px; margin-bottom: 32px; color: #e2e8f0;
+      background: #ffffff;
+      border: 1px solid #dbe3ef;
+      border-radius: 16px;
+      padding: 28px;
+      margin-bottom: 32px;
+      box-shadow: 0 8px 30px rgba(15, 23, 42, 0.06);
     }
-    .agent-panel h2 {
-      font-size: 1.4rem; color: #60a5fa; margin-bottom: 4px;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .agent-panel h2 .badge {
-      font-size: 0.65rem; background: #1e3a5f; color: #93c5fd;
-      padding: 3px 8px; border-radius: 4px; font-weight: 500; letter-spacing: 0.5px;
-    }
-    .agent-subtitle { color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; }
-
-    .agent-task-row { display: flex; gap: 12px; margin-bottom: 20px; }
+    .agent-header { text-align: center; margin-bottom: 22px; }
+    .agent-header h2 { font-size: 1.45rem; font-weight: 700; color: #0f172a; margin-bottom: 5px; }
+    .agent-subtitle { color: #64748b; font-size: 0.9rem; }
+    .agent-task-row { display: flex; gap: 12px; margin: 20px auto; max-width: 760px; }
     .agent-task-input {
-      flex: 1; padding: 10px 14px; font-size: 0.95rem; border-radius: 8px;
-      border: 1px solid #334155; background: #1e293b; color: #f1f5f9;
-      outline: none; font-family: inherit;
+      flex: 1; padding: 15px 17px; font-size: 1rem; border-radius: 10px;
+      border: 2px solid #dbe3ef; background: #f8fafc; color: #0f172a;
+      outline: none; font-family: inherit; transition: border-color .15s, box-shadow .15s;
     }
-    .agent-task-input:focus { border-color: #3b82f6; }
+    .agent-task-input:focus { border-color: #2563eb; box-shadow: 0 0 0 4px rgba(37,99,235,.10); background: #fff; }
     .btn-run-agent {
-      padding: 10px 24px; background: #2563eb; color: #fff; border: none;
-      border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
-      transition: background 0.15s;
+      padding: 14px 22px; background: #2563eb; color: #fff; border: none;
+      border-radius: 10px; font-size: .95rem; font-weight: 650; cursor: pointer;
     }
     .btn-run-agent:hover { background: #1d4ed8; }
-    .btn-run-agent:disabled { background: #334155; cursor: not-allowed; color: #64748b; }
-
-    .agent-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
-    .status-box {
-      background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 14px;
+    .btn-run-agent:disabled { background: #94a3b8; cursor: not-allowed; }
+    .agent-progress { display: none; max-width: 760px; margin: 20px auto 0; }
+    .agent-progress.visible { display: block; }
+    .agent-state {
+      display: flex; align-items: center; gap: 10px; padding: 15px 17px;
+      border: 1px solid #dbe3ef; border-radius: 10px; background: #f8fafc;
     }
-    .status-box .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px; }
-    .status-box .value { font-size: 1rem; font-weight: 600; }
-    .status-ready { color: #4ade80; }
-    .status-analyzing { color: #facc15; }
-    .status-reasoning { color: #a78bfa; }
-    .status-validating { color: #38bdf8; }
-    .status-executing { color: #fb923c; }
-    .status-completed { color: #4ade80; }
-    .status-blocked { color: #f87171; }
-    .status-error { color: #f87171; }
-
-    .privacy-stats {
-      display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;
+    .agent-spinner {
+      width: 16px; height: 16px; border: 2px solid #cbd5e1;
+      border-top-color: #2563eb; border-radius: 50%; animation: veil-spin .8s linear infinite;
+      flex: 0 0 auto;
     }
-    .privacy-stat {
-      background: #0f172a; border: 1px solid #1e3a5f; border-radius: 6px;
-      padding: 10px 16px; text-align: center; min-width: 100px;
+    @keyframes veil-spin { to { transform: rotate(360deg); } }
+    .agent-state-text { font-weight: 600; color: #1e293b; }
+    .agent-detail { color: #64748b; font-size: .85rem; margin-top: 4px; }
+    .privacy-card {
+      display: none; margin-top: 12px; padding: 13px 16px;
+      border: 1px solid #dbeafe; border-radius: 10px; background: #eff6ff;
+      color: #1e3a8a; font-size: .84rem;
     }
-    .privacy-stat .num { font-size: 1.3rem; font-weight: 700; color: #60a5fa; }
-    .privacy-stat .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 2px; }
-
-    .execution-log {
-      background: #0f172a; border: 1px solid #1e3a5f; border-radius: 8px;
-      padding: 14px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.78rem;
-      color: #94a3b8; max-height: 320px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6;
+    .privacy-card.visible { display: block; }
+    .privacy-card strong { color: #1d4ed8; }
+    .agent-result {
+      display: none; max-width: 760px; margin: 20px auto 0;
+      padding: 17px; border-radius: 10px; border: 1px solid #bbf7d0; background: #f0fdf4;
     }
-    .log-step { color: #60a5fa; }
-    .log-ok { color: #4ade80; }
-    .log-warn { color: #facc15; }
-    .log-err { color: #f87171; }
-    .log-info { color: #94a3b8; }
-    .log-action { color: #c084fc; }
-
-    .expandable-section { margin-top: 14px; }
-    .expand-toggle {
-      cursor: pointer; background: #1e293b; border: 1px solid #334155;
-      color: #93c5fd; padding: 8px 14px; border-radius: 6px; font-size: 0.8rem;
-      font-weight: 500; display: inline-block; margin-right: 8px; margin-bottom: 8px;
-    }
-    .expand-toggle:hover { background: #334155; }
-    .expand-content {
-      display: none; background: #0f172a; border: 1px solid #1e3a5f;
-      border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.75rem;
-      color: #4ade80; max-height: 300px; overflow-y: auto; white-space: pre-wrap;
-      margin-bottom: 12px;
-    }
-    .expand-content.open { display: block; }
-
-    .attack-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
-    .btn-attack {
-      padding: 8px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
-      cursor: pointer; border: 1px solid; transition: background 0.15s;
-    }
-    .btn-attack-sensitive { background: #1c1917; border-color: #7f1d1d; color: #fca5a5; }
-    .btn-attack-sensitive:hover { background: #292524; }
-    .btn-attack-js { background: #1c1917; border-color: #92400e; color: #fdba74; }
-    .btn-attack-js:hover { background: #292524; }
-    .btn-attack-unknown { background: #1c1917; border-color: #3f3f46; color: #a1a1aa; }
-    .btn-attack-unknown:hover { background: #292524; }
+    .agent-result.visible { display: block; }
+    .agent-result-title { font-weight: 700; color: #166534; margin-bottom: 4px; }
+    .agent-result-detail { color: #475569; font-size: .88rem; }
+    .agent-new-task { display: none; margin-top: 13px; background: #fff; color: #2563eb; border: 1px solid #93c5fd; border-radius: 8px; padding: 8px 14px; cursor: pointer; font-weight: 600; }
+    .agent-new-task.visible { display: inline-block; }
+    .developer-only { display: none !important; }
   </style>
 </head>
 <body>
@@ -192,88 +154,58 @@
     </div>
 
     <!-- ================================================================ -->
-    <!-- INTERACTIVE AGENT PANEL — CONNECTED TO CHROME EXTENSION          -->
+    <!-- USER-FACING AI AGENT — INTERNAL PRIVACY/REASONING DETAILS HIDDEN -->
     <!-- ================================================================ -->
     <div class="agent-panel" id="agent-panel">
-      <h2>
-        🛡️ VeilBrowse AI Browser Agent
-        <span class="badge">LOCAL PRIVACY FIREWALL • NO AWS</span>
-      </h2>
-      <div class="agent-subtitle">
-        The reasoning agent is NOT the security boundary. The browser IS the security boundary.
+      <div class="agent-header">
+        <h2>🛡️ VeilBrowse AI Browser Agent</h2>
+        <div class="agent-subtitle">Tell me what you want to do. I'll handle the browser privately.</div>
       </div>
 
-      <!-- Reasoning Provider Selection -->
-      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; background: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155;">
-        <div style="display: flex; align-items: center; gap: 10px;">
-          <span style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Reasoning Brain:</span>
-          <select id="select-provider" style="background: #0f172a; color: #60a5fa; border: 1px solid #3b82f6; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; outline: none; cursor: pointer;">
-            <option value="mock" selected>⚡ LocalMockAgent (Instant • Deterministic)</option>
-            <option value="qwen">🧠 Ollama Qwen 2.5 3B (Live Local LLM • 127.0.0.1:11434)</option>
-          </select>
-        </div>
-        <span id="provider-badge" style="font-size: 0.72rem; background: #1e3a5f; color: #93c5fd; padding: 4px 8px; border-radius: 4px; font-weight: 500;">
-          Zero Raw PII Boundary
-        </span>
-      </div>
-
-      <!-- Task Input -->
       <div class="agent-task-row">
         <input type="text" id="agent-task-input" class="agent-task-input"
                value="Open notification settings and enable email notifications."
-               placeholder="Enter a browser task for the agent..." />
-        <button type="button" id="btn-run-agent" class="btn-run-agent">▶ Run Agent</button>
+               placeholder="What would you like me to do?" autocomplete="off" />
+        <button type="button" id="btn-run-agent" class="btn-run-agent">✨ Run Agent</button>
       </div>
 
-      <!-- Status Grid -->
-      <div class="agent-status-grid">
-        <div class="status-box">
-          <div class="label">Agent Status</div>
-          <div class="value" id="agent-status"><span class="status-ready">● READY</span></div>
+      <div class="agent-progress" id="agent-progress">
+        <div class="agent-state">
+          <div class="agent-spinner" id="agent-spinner"></div>
+          <div>
+            <div class="agent-state-text" id="agent-status-text">Working...</div>
+            <div class="agent-detail" id="agent-current-step">Processing your request...</div>
+          </div>
         </div>
-        <div class="status-box">
-          <div class="label">Current Step</div>
-          <div class="value" id="agent-current-step" style="font-size:0.82rem; color:#94a3b8;">Waiting for task...</div>
-        </div>
-      </div>
-
-      <!-- Privacy Firewall Stats -->
-      <div class="status-box" style="margin-bottom:16px;">
-        <div class="label">Privacy Firewall</div>
-        <div class="privacy-stats" id="privacy-stats">
-          <div class="privacy-stat"><div class="num" id="stat-scanned">—</div><div class="lbl">Elements Scanned</div></div>
-          <div class="privacy-stat"><div class="num" id="stat-sensitive">—</div><div class="lbl">Sensitive</div></div>
-          <div class="privacy-stat"><div class="num" id="stat-redacted">—</div><div class="lbl">Redacted</div></div>
-          <div class="privacy-stat"><div class="num" id="stat-safe">—</div><div class="lbl">Allowed Controls</div></div>
-          <div class="privacy-stat"><div class="num" id="stat-pii" style="color:#4ade80;">0</div><div class="lbl">Outbound PII</div></div>
+        <div class="privacy-card" id="privacy-card">
+          🔒 <strong>Privacy protection active</strong> — sensitive information is being protected locally before any AI reasoning.
+          <span id="privacy-summary"></span>
         </div>
       </div>
 
-      <!-- Execution Log -->
-      <div class="status-box">
-        <div class="label">Execution Log</div>
-        <div class="execution-log" id="execution-log">Waiting for task...</div>
+      <div class="agent-result" id="agent-result">
+        <div class="agent-result-title" id="agent-result-title">✓ Task completed</div>
+        <div class="agent-result-detail" id="agent-result-detail">Your request was completed successfully.</div>
+        <button type="button" id="btn-new-task" class="agent-new-task">New instruction</button>
       </div>
 
-      <!-- Expandable Views -->
-      <div class="expandable-section">
-        <span class="expand-toggle" onclick="toggleExpand('sanitized-context-view')">▶ View Sanitized Context</span>
-        <span class="expand-toggle" onclick="toggleExpand('agent-decision-view')">▶ View Agent Decision</span>
-        <span class="expand-toggle" onclick="toggleExpand('validation-view')">▶ View Action Validation</span>
-        <div class="expand-content" id="sanitized-context-view">No context generated yet.</div>
-        <div class="expand-content" id="agent-decision-view">No action generated yet.</div>
-        <div class="expand-content" id="validation-view">No validation performed yet.</div>
-      </div>
-
-      <!-- Attack Demo Buttons -->
-      <div class="attack-buttons">
-        <button type="button" id="btn-test-sensitive" class="btn-attack btn-attack-sensitive">🚫 Test Sensitive Action (PASSWORD)</button>
-        <button type="button" id="btn-test-js" class="btn-attack btn-attack-js">⛔ Test EXECUTE_JS Attack</button>
-        <button type="button" id="btn-test-unknown" class="btn-attack btn-attack-unknown">❓ Test Unknown Target (Fail-Closed)</button>
+      <!-- Kept for developer/security testing; intentionally invisible in normal UX. -->
+      <div class="developer-only">
+        <select id="select-provider"><option value="qwen" selected>Qwen</option></select>
+        <div id="privacy-stats">
+          <span id="stat-scanned">—</span><span id="stat-sensitive">—</span>
+          <span id="stat-redacted">—</span><span id="stat-safe">—</span><span id="stat-pii">0</span>
+        </div>
+        <div id="execution-log"></div>
+        <div class="expandable-section">
+          <span id="sanitized-context-view"></span><span id="agent-decision-view"></span><span id="validation-view"></span>
+        </div>
+        <button id="btn-test-sensitive"></button>
+        <button id="btn-test-js"></button>
+        <button id="btn-test-unknown"></button>
       </div>
     </div>
 
-    <!-- ================================================================ -->
     <!-- EXISTING SYNTHETIC PORTAL SECTIONS (UNCHANGED)                   -->
     <!-- ================================================================ -->
 
@@ -537,9 +469,39 @@
       }
 
       if (msg.type === 'AGENT_STATUS_UPDATE') {
-        setAgentStatus(msg.status);
-        setCurrentStep(msg.currentStep || '');
-        appendLog('[' + msg.status + '] ' + (msg.currentStep || ''), getLogClass(msg.status));
+        var status = msg.status || 'WORKING';
+        var stateText = 'Working on your request...';
+        var detail = 'The agent is processing the page and taking the necessary actions.';
+        if (status === 'ANALYZING PAGE') {
+          stateText = 'Understanding the page...';
+          detail = 'Preparing the information needed to complete your request.';
+        } else if (status === 'SANITIZING CONTEXT') {
+          stateText = 'Protecting your information...';
+          detail = 'Sensitive information is being protected locally.';
+          document.getElementById('privacy-card').classList.add('visible');
+        } else if (status === 'REASONING') {
+          stateText = 'Planning the next step...';
+          detail = 'The agent is deciding what to do next.';
+          document.getElementById('privacy-card').classList.add('visible');
+        } else if (status === 'VALIDATING ACTION') {
+          stateText = 'Checking the action...';
+          detail = 'VeilBrowse is verifying that the requested action is safe.';
+        } else if (status === 'EXECUTING') {
+          stateText = 'Executing...';
+          detail = 'The agent is interacting with the browser.';
+        } else if (status === 'BLOCKED') {
+          stateText = 'Action stopped for your protection';
+          detail = 'VeilBrowse blocked an unsafe or ambiguous action.';
+          document.getElementById('agent-spinner').style.display = 'none';
+        } else if (status === 'ERROR') {
+          stateText = 'Something went wrong';
+          detail = 'The agent could not safely complete the request.';
+          document.getElementById('agent-spinner').style.display = 'none';
+        }
+        setAgentStatus(status);
+        document.getElementById('agent-progress').classList.add('visible');
+        document.getElementById('agent-status-text').textContent = stateText;
+        document.getElementById('agent-current-step').textContent = detail;
         return;
       }
 
@@ -580,44 +542,20 @@
       }
 
       if (msg.type === 'AGENT_TASK_COMPLETED') {
-        const p = msg.payload;
-        setAgentStatus('COMPLETED');
-        setCurrentStep(p.finalResult || 'Task completed.');
-        setPrivacyStats(p.summary);
-
-        appendLog('', 'log-info');
-        appendLog('═══════════════════════════════════════', 'log-ok');
-        appendLog('✓ TASK COMPLETED: ' + p.finalResult, 'log-ok');
-        appendLog('═══════════════════════════════════════', 'log-ok');
-        appendLog('Provider: ' + (p.providerId || 'LocalMockAgent') + ' (ReasoningProvider)', 'log-info');
-        appendLog('Sensitive Elements Redacted: ' + p.summary.redactedCount, 'log-info');
-        appendLog('Outbound PII: ' + p.summary.outboundPii, 'log-info');
-
-        // Update sanitized context view with the ACTUAL context from this run
-        if (p.sanitizedContext) {
-          const ctx = p.sanitizedContext;
-          const displayCtx = {
-            pageUrl: ctx.pageUrl,
-            pageTitle: ctx.pageTitle,
-            redactionCoverage: ctx.redactionCoverage,
-            isFailClosed: ctx.isFailClosed,
-            summary: ctx.summary,
-            elements: ctx.elements.map(function(e) {
-              return {
-                elementId: e.elementId,
-                tagName: e.tagName,
-                role: e.role,
-                category: e.category,
-                decision: e.decision,
-                maskToken: e.maskToken || undefined,
-                accessibleLabel: e.accessibleLabel || undefined,
-                interactable: e.interactable
-              };
-            })
-          };
-          document.getElementById('sanitized-context-view').textContent = JSON.stringify(displayCtx, null, 2);
-        }
-
+        const p = msg.payload || {};
+        setPrivacyStats(p.summary || {});
+        document.getElementById('agent-progress').classList.add('visible');
+        document.getElementById('privacy-card').classList.add('visible');
+        document.getElementById('agent-spinner').style.display = 'none';
+        document.getElementById('agent-status-text').textContent = 'Completed';
+        document.getElementById('agent-current-step').textContent = 'Your request has been completed.';
+        document.getElementById('privacy-summary').textContent =
+          ' ' + ((p.summary && p.summary.redactedCount) || 0) + ' sensitive item(s) protected; no raw sensitive values were sent to the reasoning model.';
+        document.getElementById('agent-result-title').textContent = '✓ Task completed';
+        document.getElementById('agent-result-detail').textContent =
+          p.finalResult || 'The requested browser task was completed successfully.';
+        document.getElementById('agent-result').classList.add('visible');
+        document.getElementById('btn-new-task').classList.add('visible');
         document.getElementById('btn-run-agent').disabled = false;
         return;
       }
@@ -668,7 +606,7 @@
       }
     });
 
-    function getLogClass(status) {
+    // Developer/security handlers remain available but their controls are hidden from normal users.\n    function getLogClass(status) {
       if (status === 'COMPLETED') return 'log-ok';
       if (status === 'BLOCKED' || status === 'ERROR') return 'log-err';
       if (status === 'VALIDATING ACTION') return 'log-warn';
@@ -682,131 +620,28 @@
 
     document.getElementById('btn-run-agent').addEventListener('click', function() {
       var task = document.getElementById('agent-task-input').value.trim();
-      if (!task) { alert('Please enter a task.'); return; }
-
-      var provider = document.getElementById('select-provider').value;
-      var providerLabel = provider === 'qwen' ? 'Ollama Qwen 2.5 3B (Local LLM)' : 'LocalMockAgent (Deterministic)';
+      if (!task) { document.getElementById('agent-task-input').focus(); return; }
 
       this.disabled = true;
-      clearLog();
-      setAgentStatus('ANALYZING PAGE');
-      setCurrentStep('Starting agent pipeline with ' + providerLabel + '...');
-      appendLog('[TASK] "' + task + '"', 'log-step');
-      appendLog('[REASONING BRAIN] ' + providerLabel, 'log-action');
-      appendLog('[PIPELINE] Task → Privacy Firewall → Sanitized Context → ReasoningProvider → AgentAction → Validator → Browser', 'log-info');
-      appendLog('', 'log-info');
+      document.getElementById('agent-progress').classList.add('visible');
+      document.getElementById('agent-result').classList.remove('visible');
+      document.getElementById('privacy-card').classList.remove('visible');
+      document.getElementById('agent-spinner').style.display = 'block';
+      document.getElementById('agent-status-text').textContent = 'Starting...';
+      document.getElementById('agent-current-step').textContent = 'Processing your request...';
 
-      sendToExtension('RUN_AGENT_TASK', { task: task, provider: provider });
-
-      // Fallback if extension message not handled
-      var responded = false;
-      var onResp = function(e) {
-        if (e.data && e.data.source === 'VEILBROWSE_EXTENSION' && (e.data.type === 'AGENT_STATUS_UPDATE' || e.data.type === 'AGENT_STEP_COMPLETED')) {
-          responded = true;
-          window.removeEventListener('message', onResp);
-        }
-      };
-      window.addEventListener('message', onResp);
-
-      setTimeout(function() {
-        if (!responded) {
-          runFallbackPipeline(task, provider);
-        }
-      }, 700);
+      // The page is UI only. All reasoning, privacy checks and execution remain in the extension.
+      sendToExtension('RUN_AGENT_TASK', { task: task, provider: 'qwen' });
     });
 
-    async function runFallbackPipeline(task, provider) {
-      setAgentStatus('ANALYZING PAGE');
-      setCurrentStep('DOM scanner inspecting interactive elements & accessibility roles...');
-      await new Promise(function(r) { setTimeout(r, 300); });
-
-      setAgentStatus('SANITIZING CONTEXT');
-      setCurrentStep('Local privacy firewall stripping values and anonymizing sensitive IDs...');
-      await new Promise(function(r) { setTimeout(r, 300); });
-
-      setAgentStatus('REASONING');
-      var isQwen = provider === 'qwen';
-      setCurrentStep(isQwen ? 'Ollama Qwen 2.5 3B local LLM reasoning on sanitized context (zero secrets)...' : 'LocalMockAgent planning actions...');
-      appendLog('[REASONING] Evaluating task on sanitized context...', 'log-info');
-
-      var targetAction = { action: 'CLICK', targetId: 'email-notif-toggle' };
-
-      if (isQwen) {
-        try {
-          appendLog('[OLLAMA] Calling http://127.0.0.1:11434/api/chat with model "qwen2.5:3b"...', 'log-action');
-          var res = await fetch('http://127.0.0.1:11434/api/chat', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              model: 'qwen2.5:3b',
-              messages: [
-                {
-                  role: 'system',
-                  content: 'You are an autonomous AI browser agent operating through VeilBrowse privacy firewall. You receive ONLY sanitized page elements. Return JSON conforming to {"action":"CLICK","targetId":"elementId"}. Return ONLY valid JSON.'
-                },
-                {
-                  role: 'user',
-                  content: 'Task: ' + task + '\nSanitized Elements: [{"id":"email-notif-toggle","role":"checkbox","label":"Enable email notifications","category":"none","decision":"ALLOWED"}]'
-                }
-              ],
-              stream: false,
-              format: 'json'
-            })
-          });
-          var data = await res.json();
-          var parsed = JSON.parse(data.message.content);
-          if (parsed && parsed.action) {
-            targetAction = parsed;
-          }
-          appendLog('[OLLAMA QWEN RESPONSE] ' + JSON.stringify(targetAction), 'log-ok');
-        } catch (e) {
-          appendLog('[OLLAMA NOTE] Using fallback action (' + e.message + ')', 'log-warn');
-        }
-      }
-
-      setAgentStatus('VALIDATING ACTION');
-      setCurrentStep('Action 1/1: Validating ' + targetAction.action + ' on ' + (targetAction.targetId || 'target') + '...');
-      await new Promise(function(r) { setTimeout(r, 250); });
-
-      appendLog('', 'log-info');
-      appendLog('━━━ Step 1 ━━━', 'log-step');
-      appendLog('Action: ' + JSON.stringify(targetAction), 'log-action');
-      appendLog('Tier 1 Schema: ✓ APPROVED', 'log-ok');
-      appendLog('Tier 2 Policy: ✓ APPROVED (Target is SAFE non-sensitive toggle)', 'log-ok');
-
-      setAgentStatus('EXECUTING');
-      setCurrentStep('Executing ' + targetAction.action + ' in live browser...');
-      await new Promise(function(r) { setTimeout(r, 350); });
-
-      var toggle = document.getElementById('email-notif-toggle');
-      if (toggle) {
-        toggle.checked = true;
-        toggle.dispatchEvent(new Event('change'));
-      }
-      appendLog('Execution: ✓ SUCCESS — Clicked #email-notif-toggle (checkbox toggled ON)', 'log-ok');
-
-      setAgentStatus('COMPLETED');
-      setCurrentStep('Email notifications enabled successfully. Webpage state updated.');
-      appendLog('', 'log-info');
-      appendLog('═══════════════════════════════════════', 'log-ok');
-      appendLog('✓ TASK COMPLETED: Email notifications enabled successfully.', 'log-ok');
-      appendLog('═══════════════════════════════════════', 'log-ok');
-
-      document.getElementById('agent-decision-view').textContent =
-        'Agent Action:\n' + JSON.stringify(targetAction, null, 2) + '\n\n' +
-        'Provider: ' + (isQwen ? 'Ollama Qwen 2.5 3B' : 'LocalMockAgent') + '\n' +
-        'Input: UnifiedSanitizedContext (zero raw secrets)\n' +
-        'Raw Sensitive Values: NOT PROVIDED';
-
-      document.getElementById('validation-view').textContent =
-        'Tier 1 Schema Check: ✓ APPROVED\n' +
-        'Tier 2 Policy Check: ✓ APPROVED\n' +
-        'Reasons: Target element is non-sensitive toggle.\n' +
-        'Decision: ✓ ALLOWED\n' +
-        'Execution: SUCCESS';
-
+    document.getElementById('btn-new-task').addEventListener('click', function() {
+      document.getElementById('agent-result').classList.remove('visible');
+      document.getElementById('agent-progress').classList.remove('visible');
+      document.getElementById('privacy-card').classList.remove('visible');
+      document.getElementById('agent-spinner').style.display = 'block';
       document.getElementById('btn-run-agent').disabled = false;
-    }
+      document.getElementById('agent-task-input').focus();
+    });
 
     document.getElementById('btn-test-sensitive').addEventListener('click', function() {
       document.getElementById('btn-run-agent').disabled = true;
