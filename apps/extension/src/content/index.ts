@@ -402,8 +402,15 @@ async function runUnknownTargetTest(): Promise<void> {
 
 // Extension side-panel bridge: agent execution stays inside the content script,
  // while the side panel provides the user-facing controls.
-chrome.runtime.onMessage.addListener((message: { type?: string; payload?: { task?: string; provider?: string } }) => {
+chrome.runtime.onMessage.addListener(
+  (
+    message: { type?: string; payload?: { task?: string; provider?: string } },
+    _sender: chrome.runtime.MessageSender,
+    sendResponse: (response: unknown) => void
+  ) => {
   if (message.type !== 'RUN_AGENT_TASK_FROM_PANEL') return;
+
+  sendResponse({ ok: true });
 
   const task =
     typeof message.payload?.task === 'string' && message.payload.task.trim().length > 0
