@@ -1,6 +1,6 @@
 # VeilBrowse Benchmark Report
 
-**Generated:** 2026-09-20T15:05:36.026Z
+**Generated:** 2026-09-20T15:10:19.308Z
 **Environment:** Node v22.14.0 (win32)
 **Scope:** 100% precision, recall, F1, and redaction coverage on the 23-case synthetic benchmark.
 *Note: VeilBrowse does not claim 100% PII detection in general. Performance reflects the 23-case synthetic benchmark.*
@@ -39,15 +39,15 @@
 
 | Pipeline Component | Latency |
 |---|---|
-| DOM Classification Latency (per element) | 0.222 ms |
-| Visual Scan Latency (per token) | 0.4 ms |
+| DOM Classification Latency (per element) | 0.389 ms |
+| Visual Scan Latency (per token) | 0.6 ms |
 | Firewall Sanitization (Full Document) | 1 ms |
-| End-to-End Local Agent Workflow | 1 ms |
+| End-to-End Local Agent Workflow | 2 ms |
 
 | Resource Metric | Value |
 |---|---|
-| Heap Total | 204.07 MB |
-| RSS | 250.02 MB |
+| Heap Total | 202.32 MB |
+| RSS | 248.66 MB |
 
 ---
 
