@@ -1,7 +1,6 @@
 # VeilBrowse — A Privacy Firewall for AI Browser Agents
 
-> **LOCAL IMPLEMENTATION PROTOTYPE (Phases 1–11 Complete & Hardened)**  
-> **AWS & Ollama Integration Status:** Intentionally **NOT IMPLEMENTED** in this local stage. Cloud reasoning (AWS API Gateway, Lambda, Bedrock, DynamoDB) and local LLM backends (Ollama) will begin in the subsequent integration phases.
+
 
 VeilBrowse is a browser-native privacy firewall for AI browser agents. It ensures that sensitive DOM information, form values, credentials, and visual PII are detected, sanitized, and redacted **locally inside the browser** before any representation is exposed to an agent or remote reasoning service.
 
