@@ -11,6 +11,7 @@ module.exports = {
     background: './src/background/index.ts',
     content: './src/content/index.ts',
     popup: './src/ui/popup.ts',
+    sidepanel: './src/ui/sidepanel.ts',
   },
 
   output: {
@@ -50,6 +51,7 @@ module.exports = {
         { from: 'manifest.json', to: 'manifest.json' },
         // Copy popup HTML to dist/ — script tag references dist/popup.js
         { from: 'src/ui/popup.html', to: 'popup.html' },
+        { from: 'src/ui/sidepanel.html', to: 'sidepanel.html' },
       ],
     }),
   ],
