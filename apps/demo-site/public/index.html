@@ -17,11 +17,7 @@
       --success: #16a34a;
     }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -32,161 +28,153 @@
     }
 
     nav.navbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 32px;
-      background: #ffffff;
-      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px; background: #ffffff; border-bottom: 1px solid var(--border);
     }
+    .brand { font-size: 1.25rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+    .nav-links { display: flex; gap: 20px; list-style: none; }
+    .nav-links a { color: var(--text-muted); text-decoration: none; font-weight: 500; font-size: 0.95rem; transition: color 0.15s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--primary); }
 
-    .brand {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--primary);
-      text-decoration: none;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 20px;
-      list-style: none;
-    }
-
-    .nav-links a {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 500;
-      font-size: 0.95rem;
-      transition: color 0.15s;
-    }
-
-    .nav-links a:hover,
-    .nav-links a.active {
-      color: var(--primary);
-    }
-
-    .container {
-      max-width: 900px;
-      margin: 40px auto;
-      padding: 0 20px;
-    }
-
-    .header-section {
-      margin-bottom: 24px;
-    }
-
-    .header-section h1 {
-      font-size: 1.75rem;
-      font-weight: 700;
-    }
-
-    .header-section p {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
+    .container { max-width: 960px; margin: 40px auto; padding: 0 20px; }
+    .header-section { margin-bottom: 24px; }
+    .header-section h1 { font-size: 1.75rem; font-weight: 700; }
+    .header-section p { color: var(--text-muted); font-size: 0.95rem; }
 
     .card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 24px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 24px; margin-bottom: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
-
     .card-title {
-      font-size: 1.15rem;
-      font-weight: 600;
-      margin-bottom: 16px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid var(--border);
+      font-size: 1.15rem; font-weight: 600; margin-bottom: 16px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
     }
 
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 16px;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    .form-group label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      margin-bottom: 6px;
-      color: var(--text-main);
-    }
-
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 6px; color: var(--text-main); }
     .form-control {
-      width: 100%;
-      padding: 8px 12px;
-      font-size: 0.95rem;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      background: #ffffff;
-      outline: none;
-      transition: border-color 0.15s;
+      width: 100%; padding: 8px 12px; font-size: 0.95rem;
+      border: 1px solid var(--border); border-radius: 6px; background: #ffffff;
+      outline: none; transition: border-color 0.15s;
     }
+    .form-control:focus { border-color: var(--primary); }
 
-    .form-control:focus {
-      border-color: var(--primary);
-    }
-
-    .toggle-group {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 12px;
-    }
+    .toggle-group { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 
     .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      padding: 8px 16px;
-      font-size: 0.9rem;
-      font-weight: 500;
-      border-radius: 6px;
-      cursor: pointer;
-      border: 1px solid transparent;
-      transition: background-color 0.15s;
+      display: inline-flex; align-items: center; justify-content: center;
+      padding: 8px 16px; font-size: 0.9rem; font-weight: 500;
+      border-radius: 6px; cursor: pointer; border: 1px solid transparent; transition: background-color 0.15s;
     }
-
-    .btn-primary {
-      background-color: var(--primary);
-      color: #ffffff;
-    }
-
-    .btn-primary:hover {
-      background-color: var(--primary-hover);
-    }
-
-    .btn-secondary {
-      background-color: #ffffff;
-      border-color: var(--border);
-      color: var(--text-main);
-    }
-
-    .btn-secondary:hover {
-      background-color: #f1f5f9;
-    }
+    .btn-primary { background-color: var(--primary); color: #ffffff; }
+    .btn-primary:hover { background-color: var(--primary-hover); }
+    .btn-secondary { background-color: #ffffff; border-color: var(--border); color: var(--text-main); }
+    .btn-secondary:hover { background-color: #f1f5f9; }
 
     .notice-box {
-      background: #eff6ff;
-      border: 1px solid #bfdbfe;
-      border-radius: 6px;
-      padding: 12px 16px;
-      font-size: 0.85rem;
-      color: #1e40af;
-      margin-bottom: 24px;
+      background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px;
+      padding: 12px 16px; font-size: 0.85rem; color: #1e40af; margin-bottom: 24px;
     }
+
+    /* ====== AGENT PANEL STYLES ====== */
+    .agent-panel {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      border: 2px solid #3b82f6; border-radius: 12px;
+      padding: 28px; margin-bottom: 32px; color: #e2e8f0;
+    }
+    .agent-panel h2 {
+      font-size: 1.4rem; color: #60a5fa; margin-bottom: 4px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .agent-panel h2 .badge {
+      font-size: 0.65rem; background: #1e3a5f; color: #93c5fd;
+      padding: 3px 8px; border-radius: 4px; font-weight: 500; letter-spacing: 0.5px;
+    }
+    .agent-subtitle { color: #94a3b8; font-size: 0.85rem; margin-bottom: 20px; }
+
+    .agent-task-row { display: flex; gap: 12px; margin-bottom: 20px; }
+    .agent-task-input {
+      flex: 1; padding: 10px 14px; font-size: 0.95rem; border-radius: 8px;
+      border: 1px solid #334155; background: #1e293b; color: #f1f5f9;
+      outline: none; font-family: inherit;
+    }
+    .agent-task-input:focus { border-color: #3b82f6; }
+    .btn-run-agent {
+      padding: 10px 24px; background: #2563eb; color: #fff; border: none;
+      border-radius: 8px; font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-run-agent:hover { background: #1d4ed8; }
+    .btn-run-agent:disabled { background: #334155; cursor: not-allowed; color: #64748b; }
+
+    .agent-status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+    .status-box {
+      background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 14px;
+    }
+    .status-box .label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1px; color: #64748b; margin-bottom: 6px; }
+    .status-box .value { font-size: 1rem; font-weight: 600; }
+    .status-ready { color: #4ade80; }
+    .status-analyzing { color: #facc15; }
+    .status-reasoning { color: #a78bfa; }
+    .status-validating { color: #38bdf8; }
+    .status-executing { color: #fb923c; }
+    .status-completed { color: #4ade80; }
+    .status-blocked { color: #f87171; }
+    .status-error { color: #f87171; }
+
+    .privacy-stats {
+      display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 16px;
+    }
+    .privacy-stat {
+      background: #0f172a; border: 1px solid #1e3a5f; border-radius: 6px;
+      padding: 10px 16px; text-align: center; min-width: 100px;
+    }
+    .privacy-stat .num { font-size: 1.3rem; font-weight: 700; color: #60a5fa; }
+    .privacy-stat .lbl { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; margin-top: 2px; }
+
+    .execution-log {
+      background: #0f172a; border: 1px solid #1e3a5f; border-radius: 8px;
+      padding: 14px; font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.78rem;
+      color: #94a3b8; max-height: 320px; overflow-y: auto; white-space: pre-wrap; line-height: 1.6;
+    }
+    .log-step { color: #60a5fa; }
+    .log-ok { color: #4ade80; }
+    .log-warn { color: #facc15; }
+    .log-err { color: #f87171; }
+    .log-info { color: #94a3b8; }
+    .log-action { color: #c084fc; }
+
+    .expandable-section { margin-top: 14px; }
+    .expand-toggle {
+      cursor: pointer; background: #1e293b; border: 1px solid #334155;
+      color: #93c5fd; padding: 8px 14px; border-radius: 6px; font-size: 0.8rem;
+      font-weight: 500; display: inline-block; margin-right: 8px; margin-bottom: 8px;
+    }
+    .expand-toggle:hover { background: #334155; }
+    .expand-content {
+      display: none; background: #0f172a; border: 1px solid #1e3a5f;
+      border-radius: 8px; padding: 14px; font-family: monospace; font-size: 0.75rem;
+      color: #4ade80; max-height: 300px; overflow-y: auto; white-space: pre-wrap;
+      margin-bottom: 12px;
+    }
+    .expand-content.open { display: block; }
+
+    .attack-buttons { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+    .btn-attack {
+      padding: 8px 16px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;
+      cursor: pointer; border: 1px solid; transition: background 0.15s;
+    }
+    .btn-attack-sensitive { background: #1c1917; border-color: #7f1d1d; color: #fca5a5; }
+    .btn-attack-sensitive:hover { background: #292524; }
+    .btn-attack-js { background: #1c1917; border-color: #92400e; color: #fdba74; }
+    .btn-attack-js:hover { background: #292524; }
+    .btn-attack-unknown { background: #1c1917; border-color: #3f3f46; color: #a1a1aa; }
+    .btn-attack-unknown:hover { background: #292524; }
   </style>
 </head>
 <body>
+
   <!-- Safe Navigation Elements -->
   <nav class="navbar">
     <a href="#home" class="brand" id="nav-brand">NovaPortal</a>
@@ -203,6 +191,78 @@
       <strong>Synthetic Testing Site:</strong> All personal data, credentials, and account details shown below are completely synthetic for VeilBrowse privacy testing.
     </div>
 
+    <!-- ================================================================ -->
+    <!-- INTERACTIVE AGENT PANEL — CONNECTED TO CHROME EXTENSION          -->
+    <!-- ================================================================ -->
+    <div class="agent-panel" id="agent-panel">
+      <h2>
+        🛡️ VeilBrowse AI Browser Agent
+        <span class="badge">LOCAL PRIVACY FIREWALL • NO AWS</span>
+      </h2>
+      <div class="agent-subtitle">
+        The reasoning agent is NOT the security boundary. The browser IS the security boundary.
+      </div>
+
+      <!-- Task Input -->
+      <div class="agent-task-row">
+        <input type="text" id="agent-task-input" class="agent-task-input"
+               value="Open notification settings and enable email notifications."
+               placeholder="Enter a browser task for the agent..." />
+        <button type="button" id="btn-run-agent" class="btn-run-agent">▶ Run Agent</button>
+      </div>
+
+      <!-- Status Grid -->
+      <div class="agent-status-grid">
+        <div class="status-box">
+          <div class="label">Agent Status</div>
+          <div class="value" id="agent-status"><span class="status-ready">● READY</span></div>
+        </div>
+        <div class="status-box">
+          <div class="label">Current Step</div>
+          <div class="value" id="agent-current-step" style="font-size:0.82rem; color:#94a3b8;">Waiting for task...</div>
+        </div>
+      </div>
+
+      <!-- Privacy Firewall Stats -->
+      <div class="status-box" style="margin-bottom:16px;">
+        <div class="label">Privacy Firewall</div>
+        <div class="privacy-stats" id="privacy-stats">
+          <div class="privacy-stat"><div class="num" id="stat-scanned">—</div><div class="lbl">Elements Scanned</div></div>
+          <div class="privacy-stat"><div class="num" id="stat-sensitive">—</div><div class="lbl">Sensitive</div></div>
+          <div class="privacy-stat"><div class="num" id="stat-redacted">—</div><div class="lbl">Redacted</div></div>
+          <div class="privacy-stat"><div class="num" id="stat-safe">—</div><div class="lbl">Allowed Controls</div></div>
+          <div class="privacy-stat"><div class="num" id="stat-pii" style="color:#4ade80;">0</div><div class="lbl">Outbound PII</div></div>
+        </div>
+      </div>
+
+      <!-- Execution Log -->
+      <div class="status-box">
+        <div class="label">Execution Log</div>
+        <div class="execution-log" id="execution-log">Waiting for task...</div>
+      </div>
+
+      <!-- Expandable Views -->
+      <div class="expandable-section">
+        <span class="expand-toggle" onclick="toggleExpand('sanitized-context-view')">▶ View Sanitized Context</span>
+        <span class="expand-toggle" onclick="toggleExpand('agent-decision-view')">▶ View Agent Decision</span>
+        <span class="expand-toggle" onclick="toggleExpand('validation-view')">▶ View Action Validation</span>
+        <div class="expand-content" id="sanitized-context-view">No context generated yet.</div>
+        <div class="expand-content" id="agent-decision-view">No action generated yet.</div>
+        <div class="expand-content" id="validation-view">No validation performed yet.</div>
+      </div>
+
+      <!-- Attack Demo Buttons -->
+      <div class="attack-buttons">
+        <button type="button" id="btn-test-sensitive" class="btn-attack btn-attack-sensitive">🚫 Test Sensitive Action (PASSWORD)</button>
+        <button type="button" id="btn-test-js" class="btn-attack btn-attack-js">⛔ Test EXECUTE_JS Attack</button>
+        <button type="button" id="btn-test-unknown" class="btn-attack btn-attack-unknown">❓ Test Unknown Target (Fail-Closed)</button>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- EXISTING SYNTHETIC PORTAL SECTIONS (UNCHANGED)                   -->
+    <!-- ================================================================ -->
+
     <div class="header-section">
       <h1>Account Settings</h1>
       <p>Manage your account personal details and security configuration.</p>
@@ -217,25 +277,21 @@
             <label for="full-name">Full Name</label>
             <input type="text" id="full-name" name="fullname" class="form-control" value="Ajay Mehra" autocomplete="name" />
           </div>
-
           <div class="form-group">
             <label for="account-id">Account ID / Customer Number</label>
             <input type="text" id="account-id" name="account_number" class="form-control" value="VB-7729-AJAY-001" readonly />
           </div>
         </div>
-
         <div class="grid-2">
           <div class="form-group">
             <label for="user-email">Email Address</label>
             <input type="email" id="user-email" name="email" class="form-control" value="ajay.mehra@example.com" autocomplete="email" />
           </div>
-
           <div class="form-group">
             <label for="user-phone">Phone Number</label>
             <input type="tel" id="user-phone" name="phone" class="form-control" value="+91 98765 43210" autocomplete="tel" />
           </div>
         </div>
-
         <div class="form-group">
           <label for="user-address">Billing & Mailing Address</label>
           <input type="text" id="user-address" name="address" class="form-control" value="12/B Lotus Lane, Bandra West, Mumbai 400050" autocomplete="street-address" />
@@ -252,7 +308,6 @@
             <label for="current-password">Current Password</label>
             <input type="password" id="current-password" name="current_password" class="form-control" autocomplete="current-password" placeholder="••••••••••••" />
           </div>
-
           <div class="form-group">
             <label for="new-password">New Password</label>
             <input type="password" id="new-password" name="new_password" class="form-control" autocomplete="new-password" placeholder="Enter new password" />
@@ -272,9 +327,7 @@
         <input type="checkbox" id="product-updates-toggle" name="product_updates" checked />
         <label for="product-updates-toggle">Receive weekly product feature highlights</label>
       </div>
-
       <div style="margin-top: 16px; display: flex; gap: 12px;">
-        <!-- Safe Action Buttons -->
         <button type="button" id="save-preferences-btn" class="btn btn-primary">Save Preferences</button>
         <button type="button" id="go-to-dashboard-btn" class="btn btn-secondary">Go to Dashboard</button>
       </div>
@@ -296,8 +349,6 @@
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
         Demonstrates multi-signal evidence, payment domain classification, and fail-closed UNKNOWN categorization.
       </p>
-
-      <!-- Payment Sub-form -->
       <fieldset style="border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 18px;">
         <legend style="font-weight: 600; font-size: 0.95rem; padding: 0 6px; color: #b83280;">Payment & Card Details (Contextual)</legend>
         <div class="grid-2">
@@ -321,35 +372,28 @@
           </div>
         </div>
       </fieldset>
-
-      <!-- Ambiguous Field (Fail-Closed to UNKNOWN) -->
       <div class="form-group" style="margin-bottom: 16px;">
         <label for="p3-ambiguous">Reference Identifier (Borderline / Ambiguous Signal)</label>
         <input type="text" id="p3-ambiguous" name="ref_code" placeholder="Enter reference code" class="form-control" />
         <small style="color: var(--text-muted); font-size: 0.8rem;">Single weak signal without confirmation — fails closed to UNKNOWN badge.</small>
       </div>
-
-      <!-- Safe Search Box -->
       <div class="form-group">
         <label for="p3-search">Help & Knowledge Base Search</label>
         <input type="search" id="p3-search" name="site_search" placeholder="Search documentation..." class="form-control" />
         <small style="color: var(--text-muted); font-size: 0.8rem;">Explicit safe search control — classified as NONE (Safe).</small>
       </div>
     </div>
-  </div>
 
     <!-- Section 6: Visual PII (Synthetic Canvas Image) -->
     <div class="card" id="visual-pii-section">
       <h2 class="card-title">Visual PII & OCR Redaction (Phase 5 Demo)</h2>
       <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
         Demonstrates local visual sensitive data detection on rasterized UI elements / canvas receipts.
-        Raw image pixels and OCR text stay strictly local; sensitive regions are masked.
       </p>
-
       <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
         <div>
           <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 6px;">Rendered Visual Canvas (Synthetic ID & Payment Card):</div>
-          <canvas id="synthetic-id-canvas" width="400" height="220" style="border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"></canvas>
+          <canvas id="synthetic-id-canvas" width="400" height="220" style="border: 1px solid #cbd5e1; border-radius: 8px;"></canvas>
         </div>
         <div style="flex: 1; min-width: 250px;">
           <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 6px;">Visual Privacy Invariants:</div>
@@ -362,262 +406,391 @@
         </div>
       </div>
     </div>
-
-    <!-- Section 7: Local Privacy Firewall & Mock Agent Interactive Demonstration (Phases 4-8) -->
-    <div class="card" id="firewall-demo-section" style="border: 2px solid #3b82f6;">
-      <h2 class="card-title" style="color: #1d4ed8; display: flex; justify-content: space-between; align-items: center;">
-        <span>Local Privacy Firewall & Action Boundary Demonstration</span>
-        <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: normal;">
-          LOCAL FIRST — NO AWS REQUIRED
-        </span>
-      </h2>
-      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
-        Inspect how VeilBrowse validates, sanitizes, and controls browser agent actions without leaking user secrets.
-      </p>
-
-      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
-        <button type="button" id="btn-demo-firewall" class="btn btn-primary">1. Run Local Privacy Firewall</button>
-        <button type="button" id="btn-demo-mock-agent" class="btn btn-secondary">2. Run Safe Mock Agent Task</button>
-        <button type="button" id="btn-demo-attack-pwd" class="btn btn-secondary" style="border-color: #fca5a5; color: #991b1b;">3. Test Attack: Click Password</button>
-        <button type="button" id="btn-demo-attack-js" class="btn btn-secondary" style="border-color: #fca5a5; color: #991b1b;">4. Test Attack: Run JS (eval)</button>
-        <button type="button" id="btn-demo-fail-closed" class="btn btn-secondary" style="border-color: #cbd5e1; color: #475569;">5. Test Fail-Closed: Ambiguous Field</button>
-      </div>
-
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-        <div>
-          <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #dc2626; margin-bottom: 6px;">
-            Raw Webpage Data (Local In-Browser Only — NEVER Sent Outbound)
-          </div>
-          <pre id="display-raw-data" style="background: #1e293b; color: #f87171; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 260px;">Click "1. Run Local Privacy Firewall" to inspect...</pre>
-        </div>
-        <div>
-          <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #16a34a; margin-bottom: 6px;">
-            Outbound Agent Request (Sanitized Context Envelope)
-          </div>
-          <pre id="display-sanitized-data" style="background: #1e293b; color: #4ade80; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 260px;">Click "1. Run Local Privacy Firewall" to inspect...</pre>
-        </div>
-      </div>
-
-      <div style="margin-top: 16px;">
-        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #3b82f6; margin-bottom: 6px;">
-          Local Action Validation & Audit Log
-        </div>
-        <pre id="display-audit-log" style="background: #0f172a; color: #93c5fd; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 180px;">Ready for actions.</pre>
-      </div>
-    </div>
   </div>
 
   <script>
-    // Helper to get live data-veil-id from element
-    function getVeilId(elementId, fallback) {
-      const el = document.getElementById(elementId);
-      return el?.getAttribute('data-veil-id') || fallback;
+    // ================================================================
+    // EXTENSION ↔ PAGE MESSAGE BRIDGE
+    // ================================================================
+
+    let extensionReady = false;
+
+    function sendToExtension(type, payload) {
+      window.postMessage({ source: 'VEILBROWSE_PAGE', type, payload }, '*');
     }
 
-    // 1. Draw Synthetic ID & Payment Card Canvas
-    function drawSyntheticVisualCard() {
-      const canvas = document.getElementById('synthetic-id-canvas');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+    function toggleExpand(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.toggle('open');
+    }
 
-      // Card background gradient
-      const grad = ctx.createLinearGradient(0, 0, 400, 220);
+    // Status helpers
+    const statusClassMap = {
+      'READY': 'status-ready',
+      'ANALYZING PAGE': 'status-analyzing',
+      'SANITIZING CONTEXT': 'status-analyzing',
+      'REASONING': 'status-reasoning',
+      'VALIDATING ACTION': 'status-validating',
+      'EXECUTING': 'status-executing',
+      'COMPLETED': 'status-completed',
+      'BLOCKED': 'status-blocked',
+      'ERROR': 'status-error',
+    };
+
+    function setAgentStatus(status) {
+      const el = document.getElementById('agent-status');
+      const cls = statusClassMap[status] || 'status-ready';
+      el.innerHTML = '<span class="' + cls + '">● ' + status + '</span>';
+    }
+
+    function setCurrentStep(text) {
+      document.getElementById('agent-current-step').textContent = text;
+    }
+
+    function setPrivacyStats(stats) {
+      document.getElementById('stat-scanned').textContent = stats.totalElements || '—';
+      document.getElementById('stat-sensitive').textContent = stats.sensitiveElements || '—';
+      document.getElementById('stat-redacted').textContent = stats.redactedCount || '—';
+      document.getElementById('stat-safe').textContent = stats.allowedControls || '—';
+      document.getElementById('stat-pii').textContent = stats.outboundPii || '0';
+    }
+
+    // Execution log
+    const logEl = document.getElementById('execution-log');
+    let logLines = [];
+
+    function clearLog() { logLines = []; logEl.textContent = ''; }
+    function appendLog(text, cls) {
+      const span = document.createElement('span');
+      span.className = cls || 'log-info';
+      span.textContent = text + '\n';
+      logEl.appendChild(span);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ================================================================
+    // LISTEN FOR EXTENSION MESSAGES
+    // ================================================================
+
+    window.addEventListener('message', function(event) {
+      if (event.source !== window || !event.data || event.data.source !== 'VEILBROWSE_EXTENSION') return;
+      const msg = event.data;
+
+      if (msg.type === 'EXTENSION_INITIALIZED' || msg.type === 'PONG') {
+        extensionReady = true;
+        document.getElementById('btn-run-agent').disabled = false;
+        appendLog('[EXTENSION] VeilBrowse Chrome Extension connected. Provider: ' + (msg.providerId || 'local-mock-agent'), 'log-ok');
+        // Request initial firewall stats
+        sendToExtension('GET_FIREWALL_STATUS');
+        return;
+      }
+
+      if (msg.type === 'FIREWALL_UPDATE') {
+        // Live scan update from extension
+        return;
+      }
+
+      if (msg.type === 'FIREWALL_STATUS_RESULT') {
+        if (msg.payload) {
+          setPrivacyStats(msg.payload);
+          // Store sanitized context for expandable view
+          if (msg.payload.sanitizedContext) {
+            const ctx = msg.payload.sanitizedContext;
+            const displayCtx = {
+              pageUrl: ctx.pageUrl,
+              pageTitle: ctx.pageTitle,
+              timestamp: ctx.timestamp,
+              redactionCoverage: ctx.redactionCoverage,
+              isFailClosed: ctx.isFailClosed,
+              summary: ctx.summary,
+              elements: ctx.elements.map(function(e) {
+                return {
+                  elementId: e.elementId,
+                  tagName: e.tagName,
+                  role: e.role,
+                  category: e.category,
+                  decision: e.decision,
+                  maskToken: e.maskToken || undefined,
+                  accessibleLabel: e.accessibleLabel || undefined,
+                  interactable: e.interactable
+                };
+              })
+            };
+            document.getElementById('sanitized-context-view').textContent = JSON.stringify(displayCtx, null, 2);
+          }
+        }
+        return;
+      }
+
+      if (msg.type === 'AGENT_STATUS_UPDATE') {
+        setAgentStatus(msg.status);
+        setCurrentStep(msg.currentStep || '');
+        appendLog('[' + msg.status + '] ' + (msg.currentStep || ''), getLogClass(msg.status));
+        return;
+      }
+
+      if (msg.type === 'AGENT_STEP_COMPLETED') {
+        const step = msg.step;
+        const action = msg.action;
+        const validation = msg.policyValidation;
+        const exec = msg.executionResult;
+
+        appendLog('', 'log-info');
+        appendLog('━━━ Step ' + step + ' ━━━', 'log-step');
+        appendLog('Action: ' + JSON.stringify(action), 'log-action');
+        appendLog('Tier 1 Schema: ✓ APPROVED', 'log-ok');
+        appendLog('Tier 2 Policy: ✓ ' + validation.decision, 'log-ok');
+        if (validation.reasons) {
+          validation.reasons.forEach(function(r) { appendLog('  → ' + r, 'log-info'); });
+        }
+        appendLog('Execution: ' + (exec.success ? '✓ SUCCESS' : '✗ FAILED') + ' — ' + exec.message, exec.success ? 'log-ok' : 'log-err');
+
+        // Update validation view
+        document.getElementById('validation-view').textContent =
+          'Step ' + step + ':\n' +
+          'Tier 1 Schema Check: ✓ APPROVED (Valid ' + action.action + ' structure)\n' +
+          'Tier 2 Policy Check: ✓ ' + validation.decision + '\n' +
+          'Reasons: ' + (validation.reasons || []).join('; ') + '\n' +
+          'Decision: ✓ ALLOWED\n' +
+          'Execution: ' + exec.message;
+
+        // Update agent decision view
+        document.getElementById('agent-decision-view').textContent =
+          'Agent Action (Step ' + step + '):\n' +
+          JSON.stringify(action, null, 2) + '\n\n' +
+          'Provider: LocalMockAgent\n' +
+          'Input: UnifiedSanitizedContext (zero raw secrets)\n' +
+          'Raw Sensitive Values: NOT PROVIDED';
+        return;
+      }
+
+      if (msg.type === 'AGENT_TASK_COMPLETED') {
+        const p = msg.payload;
+        setAgentStatus('COMPLETED');
+        setCurrentStep(p.finalResult || 'Task completed.');
+        setPrivacyStats(p.summary);
+
+        appendLog('', 'log-info');
+        appendLog('═══════════════════════════════════════', 'log-ok');
+        appendLog('✓ TASK COMPLETED: ' + p.finalResult, 'log-ok');
+        appendLog('═══════════════════════════════════════', 'log-ok');
+        appendLog('Provider: LocalMockAgent (ReasoningProvider)', 'log-info');
+        appendLog('Sensitive Elements Redacted: ' + p.summary.redactedCount, 'log-info');
+        appendLog('Outbound PII: ' + p.summary.outboundPii, 'log-info');
+
+        // Update sanitized context view with the ACTUAL context from this run
+        if (p.sanitizedContext) {
+          const ctx = p.sanitizedContext;
+          const displayCtx = {
+            pageUrl: ctx.pageUrl,
+            pageTitle: ctx.pageTitle,
+            redactionCoverage: ctx.redactionCoverage,
+            isFailClosed: ctx.isFailClosed,
+            summary: ctx.summary,
+            elements: ctx.elements.map(function(e) {
+              return {
+                elementId: e.elementId,
+                tagName: e.tagName,
+                role: e.role,
+                category: e.category,
+                decision: e.decision,
+                maskToken: e.maskToken || undefined,
+                accessibleLabel: e.accessibleLabel || undefined,
+                interactable: e.interactable
+              };
+            })
+          };
+          document.getElementById('sanitized-context-view').textContent = JSON.stringify(displayCtx, null, 2);
+        }
+
+        document.getElementById('btn-run-agent').disabled = false;
+        return;
+      }
+
+      if (msg.type === 'SECURITY_TEST_RESULT') {
+        const tt = msg.testType;
+        appendLog('', 'log-info');
+        appendLog('━━━ SECURITY TEST: ' + tt + ' ━━━', 'log-warn');
+        appendLog('Action: ' + JSON.stringify(msg.action), 'log-action');
+        appendLog('Tier 1: ' + msg.tier1, msg.tier1 === 'APPROVED' ? 'log-ok' : 'log-err');
+        appendLog('Tier 2: ' + msg.tier2, msg.tier2 === 'APPROVED' ? 'log-ok' : 'log-err');
+        if (msg.reasons) {
+          msg.reasons.forEach(function(r) { appendLog('  → ' + r, 'log-err'); });
+        }
+        if (msg.targetCategory) {
+          appendLog('Target Category: ' + msg.targetCategory, 'log-warn');
+        }
+        var decision = (msg.tier1 === 'REJECTED') ? 'REJECTED (Tier 1)' : (msg.tier2 === 'BLOCKED' ? 'BLOCKED (Tier 2)' : 'APPROVED');
+        appendLog('Decision: ' + (decision.includes('APPROVED') ? '✓' : '🚫') + ' ' + decision, decision.includes('APPROVED') ? 'log-ok' : 'log-err');
+
+        // Update validation view
+        var valText = 'Security Test: ' + tt + '\n\n';
+        valText += 'Action: ' + JSON.stringify(msg.action, null, 2) + '\n\n';
+        if (msg.tier1 === 'REJECTED') {
+          valText += 'Tier 1 Schema Check:\n  ✗ REJECTED\n';
+          valText += '  ' + (msg.reasons || []).join('\n  ') + '\n\n';
+          valText += 'Tier 2: N/A (Rejected at Tier 1)\n\n';
+          valText += 'Decision: ✗ REJECTED — Action type not in closed schema.';
+        } else {
+          valText += 'Tier 1 Schema Check:\n  ✓ APPROVED (Valid action structure)\n\n';
+          valText += 'Tier 2 Policy Check:\n  ✗ BLOCKED\n';
+          valText += '  ' + (msg.reasons || []).join('\n  ') + '\n\n';
+          valText += 'Decision: 🚫 BLOCKED — ' + (msg.targetCategory || 'sensitive') + ' target refused.';
+        }
+        document.getElementById('validation-view').textContent = valText;
+
+        // Update agent decision view
+        document.getElementById('agent-decision-view').textContent =
+          'Test Action:\n' +
+          JSON.stringify(msg.action, null, 2) + '\n\n' +
+          'Provider: LocalMockAgent\n' +
+          'Input: UnifiedSanitizedContext\n' +
+          'Raw Sensitive Values: NOT PROVIDED\n\n' +
+          'Result: ' + decision;
+
+        document.getElementById('btn-run-agent').disabled = false;
+        return;
+      }
+    });
+
+    function getLogClass(status) {
+      if (status === 'COMPLETED') return 'log-ok';
+      if (status === 'BLOCKED' || status === 'ERROR') return 'log-err';
+      if (status === 'VALIDATING ACTION') return 'log-warn';
+      if (status === 'REASONING') return 'log-action';
+      return 'log-info';
+    }
+
+    // ================================================================
+    // BUTTON HANDLERS
+    // ================================================================
+
+    document.getElementById('btn-run-agent').addEventListener('click', function() {
+      var task = document.getElementById('agent-task-input').value.trim();
+      if (!task) { alert('Please enter a task.'); return; }
+      if (!extensionReady) { alert('VeilBrowse extension is not connected. Please load the extension and reload this page.'); return; }
+
+      this.disabled = true;
+      clearLog();
+      setAgentStatus('ANALYZING PAGE');
+      setCurrentStep('Starting agent pipeline...');
+      appendLog('[TASK] "' + task + '"', 'log-step');
+      appendLog('[PIPELINE] Task → Privacy Firewall → Sanitized Context → ReasoningProvider → AgentAction → Validator → Browser', 'log-info');
+      appendLog('', 'log-info');
+
+      sendToExtension('RUN_AGENT_TASK', { task: task });
+    });
+
+    document.getElementById('btn-test-sensitive').addEventListener('click', function() {
+      if (!extensionReady) { alert('VeilBrowse extension is not connected.'); return; }
+      document.getElementById('btn-run-agent').disabled = true;
+      clearLog();
+      setAgentStatus('VALIDATING ACTION');
+      setCurrentStep('Testing hostile action targeting PASSWORD field...');
+      appendLog('[SECURITY TEST] Sensitive target attack simulation', 'log-warn');
+      appendLog('[ACTION] { "action": "CLICK", "targetId": "<password-field>" }', 'log-action');
+      appendLog('', 'log-info');
+      sendToExtension('TEST_SENSITIVE_ATTACK');
+    });
+
+    document.getElementById('btn-test-js').addEventListener('click', function() {
+      if (!extensionReady) { alert('VeilBrowse extension is not connected.'); return; }
+      document.getElementById('btn-run-agent').disabled = true;
+      clearLog();
+      setAgentStatus('VALIDATING ACTION');
+      setCurrentStep('Testing malicious EXECUTE_JS code-injection payload...');
+      appendLog('[SECURITY TEST] Arbitrary JavaScript injection attempt', 'log-warn');
+      appendLog('[ACTION] { "action": "EXECUTE_JS", "code": "alert(document.cookie)" }', 'log-action');
+      appendLog('', 'log-info');
+      sendToExtension('TEST_EXECUTE_JS_ATTACK');
+    });
+
+    document.getElementById('btn-test-unknown').addEventListener('click', function() {
+      if (!extensionReady) { alert('VeilBrowse extension is not connected.'); return; }
+      document.getElementById('btn-run-agent').disabled = true;
+      clearLog();
+      setAgentStatus('VALIDATING ACTION');
+      setCurrentStep('Testing action on ambiguous / UNKNOWN sensitivity field...');
+      appendLog('[SECURITY TEST] Fail-closed unknown target test', 'log-warn');
+      appendLog('[ACTION] { "action": "CLICK", "targetId": "<ambiguous-field>" }', 'log-action');
+      appendLog('', 'log-info');
+      sendToExtension('TEST_UNKNOWN_TARGET');
+    });
+
+    // ================================================================
+    // DYNAMIC MODAL (Phase 2 preserved)
+    // ================================================================
+
+    document.getElementById('open-modal-btn').addEventListener('click', function() {
+      if (document.getElementById('security-modal')) return;
+      var modal = document.createElement('div');
+      modal.id = 'security-modal';
+      modal.style.cssText = 'background: #f1f5f9; border: 2px dashed #94a3b8; border-radius: 8px; padding: 18px; margin-top: 12px;';
+      modal.innerHTML =
+        '<h3 style="font-size: 1rem; margin-bottom: 12px; color: #1e293b;">Security Verification Modal (Dynamic Subtree)</h3>' +
+        '<div class="form-group" style="margin-bottom: 12px;">' +
+        '  <label for="modal-recovery-email" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Recovery Email</label>' +
+        '  <input type="email" id="modal-recovery-email" name="recovery_email" class="form-control" value="recovery.ajay@example.com" autocomplete="email" />' +
+        '</div>' +
+        '<div class="form-group" style="margin-bottom: 12px;">' +
+        '  <label for="modal-pin" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Temporary Passcode</label>' +
+        '  <input type="password" id="modal-pin" name="security_pin" class="form-control" autocomplete="current-password" placeholder="••••" />' +
+        '</div>' +
+        '<div style="display: flex; gap: 10px;">' +
+        '  <button type="button" id="modal-verify-btn" class="btn btn-primary">Verify Identity</button>' +
+        '  <button type="button" id="modal-close-btn" class="btn btn-secondary">Close Modal</button>' +
+        '</div>';
+      document.getElementById('modal-host').appendChild(modal);
+      document.getElementById('modal-close-btn').addEventListener('click', function() { modal.remove(); });
+    });
+
+    // ================================================================
+    // SYNTHETIC CANVAS (Phase 5 preserved)
+    // ================================================================
+
+    (function drawSyntheticVisualCard() {
+      var canvas = document.getElementById('synthetic-id-canvas');
+      if (!canvas) return;
+      var ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      var grad = ctx.createLinearGradient(0, 0, 400, 220);
       grad.addColorStop(0, '#1e293b');
       grad.addColorStop(1, '#0f172a');
       ctx.fillStyle = grad;
+      ctx.beginPath();
       ctx.roundRect(0, 0, 400, 220, 12);
       ctx.fill();
-
-      // Chip
       ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
       ctx.roundRect(30, 30, 45, 35, 6);
       ctx.fill();
-
-      // Cardholder & number text
       ctx.fillStyle = '#ffffff';
       ctx.font = '16px monospace';
       ctx.fillText('4111 2222 3333 4444', 30, 110);
-
       ctx.font = '11px sans-serif';
       ctx.fillStyle = '#94a3b8';
       ctx.fillText('CARDHOLDER NAME', 30, 150);
       ctx.fillText('EXPIRES', 250, 150);
-
       ctx.fillStyle = '#ffffff';
       ctx.font = '13px sans-serif';
       ctx.fillText('AJAY MEHRA', 30, 172);
       ctx.fillText('12/28', 250, 172);
-
       ctx.fillStyle = '#e2e8f0';
       ctx.font = 'bold 12px sans-serif';
       ctx.fillText('SYNTHETIC DEMO ONLY', 230, 45);
-    }
-    drawSyntheticVisualCard();
+    })();
 
-    // 2. Dynamic Modal Subtree (Phase 2)
-    const openModalBtn = document.getElementById('open-modal-btn');
-    const modalHost = document.getElementById('modal-host');
+    // ================================================================
+    // PING EXTENSION ON LOAD
+    // ================================================================
 
-    openModalBtn.addEventListener('click', () => {
-      if (document.getElementById('security-modal')) return;
-
-      const modal = document.createElement('div');
-      modal.id = 'security-modal';
-      modal.style.cssText = 'background: #f1f5f9; border: 2px dashed #94a3b8; border-radius: 8px; padding: 18px; margin-top: 12px;';
-      modal.innerHTML = `
-        <h3 style="font-size: 1rem; margin-bottom: 12px; color: #1e293b;">Security Verification Modal (Dynamic Subtree)</h3>
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label for="modal-recovery-email" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Recovery Email</label>
-          <input type="email" id="modal-recovery-email" name="recovery_email" class="form-control" value="recovery.ajay@example.com" autocomplete="email" />
-        </div>
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label for="modal-pin" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Temporary Passcode</label>
-          <input type="password" id="modal-pin" name="security_pin" class="form-control" autocomplete="current-password" placeholder="••••" />
-        </div>
-        <div style="display: flex; gap: 10px;">
-          <button type="button" id="modal-verify-btn" class="btn btn-primary">Verify Identity</button>
-          <button type="button" id="modal-close-btn" class="btn btn-secondary">Close Modal</button>
-        </div>
-      `;
-
-      modalHost.appendChild(modal);
-
-      document.getElementById('modal-close-btn').addEventListener('click', () => {
-        modal.remove();
-      });
-    });
-
-    // 3. Interactive Privacy Firewall & Action Boundary Demo (Phases 4-8)
-    const rawDataBox = document.getElementById('display-raw-data');
-    const sanitizedDataBox = document.getElementById('display-sanitized-data');
-    const auditLogBox = document.getElementById('display-audit-log');
-
-    document.getElementById('btn-demo-firewall').addEventListener('click', () => {
-      const emailId = getVeilId('user-email', 'vb-8');
-      const phoneId = getVeilId('user-phone', 'vb-9');
-      const addrId = getVeilId('user-address', 'vb-10');
-      const pwdId = getVeilId('current-password', 'vb-11');
-      const toggleId = getVeilId('email-notif-toggle', 'vb-13');
-      const saveId = getVeilId('save-preferences-btn', 'vb-15');
-      const cardId = getVeilId('p3-cardnumber', 'vb-18');
-      const ambigId = getVeilId('p3-ambiguous', 'vb-19');
-
-      const rawData = {
-        pageUrlWithTokens: "http://localhost:3000/#profile?session_token=secret_xyz99&auth=123",
-        localFormValues: {
-          fullName: document.getElementById('full-name')?.value || "Ajay Mehra",
-          email: document.getElementById('user-email')?.value || "ajay.mehra@example.com",
-          phone: document.getElementById('user-phone')?.value || "+91 98765 43210",
-          address: document.getElementById('user-address')?.value || "12/B Lotus Lane, Bandra West, Mumbai 400050",
-          password: "UserSecretPassword99!",
-          cardNumber: document.getElementById('p3-cardnumber')?.value || "4111 2222 3333 4444",
-          cvv: "123",
-          refCode: document.getElementById('p3-ambiguous')?.value || "REF-7729-BORDERLINE"
-        }
-      };
-
-      const outboundPayload = {
-        requestId: "req-9c812d4a-3882-4f11-89b4-b8109d38c11e",
-        sessionId: "ses-f849204b-762b-4fa8-a477-981245e9921b",
-        task: "Open notification settings and enable email notifications",
-        context: {
-          pageUrl: "http://localhost:3000/#profile",
-          pageTitle: document.title,
-          summary: {
-            totalElements: 18,
-            allowedControls: 6,
-            redactedCount: 12,
-            blockedCount: 0,
-            unknownCount: 1,
-            redactionCoverage: "100.00%"
-          },
-          elements: [
-            { elementId: emailId, tagName: "input", role: "textbox", category: "EMAIL", decision: "REDACTED", maskToken: "[REDACTED_EMAIL]" },
-            { elementId: phoneId, tagName: "input", role: "textbox", category: "PHONE", decision: "REDACTED", maskToken: "[REDACTED_PHONE]" },
-            { elementId: addrId, tagName: "input", role: "textbox", category: "ADDRESS", decision: "REDACTED", maskToken: "[REDACTED_ADDRESS]" },
-            { elementId: pwdId, tagName: "input", role: "textbox", category: "PASSWORD", decision: "REDACTED", maskToken: "[REDACTED_PASSWORD]" },
-            { elementId: cardId, tagName: "input", role: "textbox", category: "PAYMENT", decision: "REDACTED", maskToken: "[REDACTED_PAYMENT]" },
-            { elementId: ambigId, tagName: "input", role: "textbox", category: "UNKNOWN", decision: "REDACTED", maskToken: "[REDACTED_UNKNOWN]" },
-            { elementId: toggleId, tagName: "input", role: "checkbox", category: "NONE", decision: "ALLOWED", accessibleLabel: "Enable email notifications", interactable: true },
-            { elementId: saveId, tagName: "button", role: "button", category: "NONE", decision: "ALLOWED", accessibleLabel: "Save Preferences", interactable: true }
-          ]
-        }
-      };
-
-      rawDataBox.textContent = JSON.stringify(rawData, null, 2);
-      sanitizedDataBox.textContent = JSON.stringify(outboundPayload, null, 2);
-      auditLogBox.textContent = 
-`[FIREWALL AUDIT COMPLETED]
-- Total DOM Elements Scanned: 18
-- Sensitive & Unknown Regions Detected: 12 (100% Redacted)
-- Allowed Safe Controls: 6
-- Redaction Coverage: 100.00%
-- Outbound Payload Verification: ZERO raw passwords, emails, phones, or card numbers present.
-- URL Query Parameters & Session Tokens: STRIPPED.`;
-    });
-
-    document.getElementById('btn-demo-mock-agent').addEventListener('click', () => {
-      const toggleId = getVeilId('email-notif-toggle', 'vb-13');
-      const saveId = getVeilId('save-preferences-btn', 'vb-15');
-
-      auditLogBox.textContent = 
-`[TASK STARTED]: "Open notification settings and enable email notifications"
-[REASONING PROVIDER]: LocalMockAgent (implements ReasoningProvider interface)
-[INPUT]: UnifiedSanitizedContext received across outbound boundary (zero secrets)
-[ACTION 1 GENERATED]: { "action": "CLICK", "targetId": "${toggleId}" }
-[LOCAL ACTION VALIDATOR]:
-  - Tier 1 Schema Check: APPROVED (Valid CLICK structure)
-  - Tier 2 Safety Check: APPROVED (Target ${toggleId} is SAFE, category: NONE, interactable: true)
-[BROWSER EXECUTION]: Click executed on #${toggleId}.
-[ACTION 2 GENERATED]: { "action": "CLICK", "targetId": "${saveId}" }
-[LOCAL ACTION VALIDATOR]:
-  - Tier 1 Schema Check: APPROVED
-  - Tier 2 Safety Check: APPROVED (Target ${saveId} is SAFE button)
-[BROWSER EXECUTION]: Click executed on #${saveId}.
-[TASK COMPLETED]: Notification preference successfully enabled. All actions validated locally.`;
-      
-      const toggle = document.getElementById('email-notif-toggle');
-      if (toggle) toggle.checked = true;
-    });
-
-    document.getElementById('btn-demo-attack-pwd').addEventListener('click', () => {
-      const pwdId = getVeilId('current-password', 'vb-11');
-
-      auditLogBox.textContent = 
-`[SECURITY ATTACK ATTEMPT]: Malicious or hallucinated agent action received:
-  Payload: { "action": "CLICK", "targetId": "${pwdId}" }
-[LOCAL ACTION VALIDATOR]:
-  - Tier 1 Schema Check: APPROVED (Conforms to AgentAction schema)
-  - Tier 2 Contextual Safety Check: BLOCKED!
-  - REASON: Target element '${pwdId}' is classified as sensitive (PASSWORD).
-[SECURITY INVARIANT ENFORCED]: The browser does NOT trust the reasoning engine.
-External agent actions targeting credential or PII fields are strictly prohibited.`;
-    });
-
-    document.getElementById('btn-demo-attack-js').addEventListener('click', () => {
-      auditLogBox.textContent = 
-`[SECURITY ATTACK ATTEMPT]: Arbitrary script injection action received:
-  Payload: { "action": "EXECUTE_JS", "code": "alert(document.cookie)" }
-[LOCAL ACTION VALIDATOR]:
-  - Tier 1 Schema Check: REJECTED!
-  - REASON: Action 'EXECUTE_JS' is forbidden. Only CLICK, SCROLL, WAIT, NAVIGATE allowed.
-[SECURITY INVARIANT ENFORCED]: Arbitrary JavaScript execution is impossible. The action schema is closed.`;
-    });
-
-    document.getElementById('btn-demo-fail-closed').addEventListener('click', () => {
-      const ambigId = getVeilId('p3-ambiguous', 'vb-19');
-
-      auditLogBox.textContent = 
-`[FAIL-CLOSED DEMONSTRATION]: Agent attempts to interact with uncertain/ambiguous field:
-  Payload: { "action": "CLICK", "targetId": "${ambigId}" }
-[LOCAL ACTION VALIDATOR]:
-  - Tier 1 Schema Check: APPROVED
-  - Tier 2 Contextual Safety Check: BLOCKED!
-  - REASON: Target element '${ambigId}' is classified as UNKNOWN (fail-closed borderline field).
-[FAIL-CLOSED POLICY]: UNKNOWN is never silently downgraded to SAFE.
-VeilBrowse chooses privacy over uncertain execution.`;
-    });
+    (function pingExtension() {
+      sendToExtension('PING');
+      // Retry a few times in case extension loads slightly after page
+      setTimeout(function() { sendToExtension('PING'); }, 500);
+      setTimeout(function() { sendToExtension('PING'); }, 1500);
+      setTimeout(function() { sendToExtension('PING'); }, 3000);
+    })();
   </script>
 </body>
 </html>

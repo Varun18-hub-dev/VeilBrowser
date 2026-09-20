@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-20T12:42:54.593Z",
+  "timestamp": "2026-09-20T14:51:40.752Z",
   "environment": {
     "nodeVersion": "v22.14.0",
     "platform": "win32"
@@ -23,15 +23,15 @@
     "redactionCoverage": 1
   },
   "latencyMetrics": {
-    "domClassificationAvgMs": 0.389,
-    "visualScanAvgMs": 0.6,
-    "firewallSanitizationMs": 2,
+    "domClassificationAvgMs": 0.167,
+    "visualScanAvgMs": 0.4,
+    "firewallSanitizationMs": 1,
     "endToEndWorkflowMs": 1
   },
   "resourceMetrics": {
     "heapUsedMB": 0.67,
-    "heapTotalMB": 203.82,
-    "rssMB": 243.28
+    "heapTotalMB": 204.57,
+    "rssMB": 250.58
   },
   "privacyViolations": {
     "totalEvaluatedSecrets": 18,
