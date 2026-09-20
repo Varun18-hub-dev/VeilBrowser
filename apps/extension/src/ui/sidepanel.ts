@@ -48,13 +48,18 @@ async function runAgent(): Promise<void> {
   privacy.classList.remove('hidden');
 
   try {
-    await chrome.runtime.sendMessage({
+    const response = await chrome.runtime.sendMessage({
       type: 'RUN_AGENT_TASK_FROM_PANEL',
       targetTabId: activeTabId,
       payload: { task, provider: 'qwen' },
-    });
-  } catch (_error) {
-    setState('Extension not ready', 'Refresh the current page and try again.', 'error');
+    }) as { ok?: boolean; error?: string } | undefined;
+
+    if (!response?.ok) {
+      throw new Error(response?.error || 'The VeilBrowse content script is not available on this page.');
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Refresh the current page and try again.';
+    setState('Extension not ready', message, 'error');
     runButton.disabled = false;
   }
 }
