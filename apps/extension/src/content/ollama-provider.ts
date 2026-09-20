@@ -56,7 +56,10 @@ export class OllamaReasoningProvider implements ReasoningProvider {
     context: UnifiedSanitizedContext
   ): Promise<AgentAction> {
     const actions = await this.planActions(task, context);
-    return actions[0] || { action: 'WAIT', durationMs: 500 };
+    if (actions.length === 0) {
+      throw new Error('Ollama returned no browser action');
+    }
+    return actions[0];
   }
 
   /**
@@ -128,14 +131,14 @@ export class OllamaReasoningProvider implements ReasoningProvider {
       }
 
       if (validActions.length === 0) {
-        return [{ action: 'WAIT', durationMs: 300 }];
+        throw new Error('Ollama returned an invalid AgentAction payload');
       }
 
       return validActions;
     } catch (err: unknown) {
-      console.warn('[VeilBrowse:OllamaProvider] Error calling Ollama:', err);
-      // Return fallback wait action on network/model error
-      return [{ action: 'WAIT', durationMs: 500 }];
+      const message = err instanceof Error ? err.message : 'Unknown Ollama error';
+      console.error('[VeilBrowse:OllamaProvider] Reasoning failed — failing closed:', message);
+      throw new Error(`Local Qwen reasoning failed: ${message}`);
     }
   }
 }
