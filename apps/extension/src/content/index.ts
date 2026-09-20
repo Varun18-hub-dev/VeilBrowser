@@ -51,6 +51,12 @@ function postToPage(data: Record<string, unknown>): void {
     },
     '*'
   );
+
+  // The extension side panel is the primary agent UI.
+  // Broadcast only structured status/results; never raw DOM values or secrets.
+  chrome.runtime.sendMessage(data).catch(() => {
+    // Side panel may be closed; this is non-fatal.
+  });
 }
 
 function handleScanUpdate(result: DomScanResult): void {
@@ -393,6 +399,22 @@ async function runUnknownTargetTest(): Promise<void> {
     currentStep: `Action BLOCKED fail-closed: Target '${targetId}' sensitivity is UNKNOWN.`,
   });
 }
+
+// Extension side-panel bridge: agent execution stays inside the content script,
+ // while the side panel provides the user-facing controls.
+chrome.runtime.onMessage.addListener((message: { type?: string; payload?: { task?: string; provider?: string } }) => {
+  if (message.type !== 'RUN_AGENT_TASK_FROM_PANEL') return;
+
+  const task =
+    typeof message.payload?.task === 'string' && message.payload.task.trim().length > 0
+      ? message.payload.task.trim()
+      : 'Enable email notifications';
+
+  const providerChoice =
+    message.payload?.provider === 'qwen' ? 'qwen' : 'qwen';
+
+  void runAgentPipeline(task, providerChoice);
+});
 
 // Window Message Listener for Page <-> Extension Bridge
 window.addEventListener('message', async (event: MessageEvent) => {
