@@ -1,6 +1,6 @@
 const taskInput = document.getElementById('task') as HTMLTextAreaElement;
 const runButton = document.getElementById('run') as HTMLButtonElement;
-const status = document.getElementById('status') as HTMLDivElement;
+const statusPanel = document.getElementById('status') as HTMLDivElement;
 const dot = document.getElementById('dot') as HTMLSpanElement;
 const state = document.getElementById('state') as HTMLSpanElement;
 const detail = document.getElementById('detail') as HTMLDivElement;
@@ -11,7 +11,7 @@ const newButton = document.getElementById('new') as HTMLButtonElement;
 let activeTabId: number | null = null;
 
 function setState(title: string, description: string, kind: 'busy' | 'done' | 'error' = 'busy'): void {
-  status.classList.remove('hidden');
+  statusPanel.classList.remove('hidden');
   state.textContent = title;
   detail.textContent = description;
   dot.className = kind === 'busy' ? 'dot busy' : kind === 'error' ? 'dot error' : 'dot';
