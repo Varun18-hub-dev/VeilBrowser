@@ -48,8 +48,9 @@ async function runAgent(): Promise<void> {
   privacy.classList.remove('hidden');
 
   try {
-    await chrome.tabs.sendMessage(activeTabId, {
+    await chrome.runtime.sendMessage({
       type: 'RUN_AGENT_TASK_FROM_PANEL',
+      targetTabId: activeTabId,
       payload: { task, provider: 'qwen' },
     });
   } catch (_error) {
