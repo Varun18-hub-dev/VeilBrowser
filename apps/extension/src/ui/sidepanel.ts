@@ -86,7 +86,7 @@ runButton.addEventListener('click', () => { void runAgent(); });
 newButton.addEventListener('click', () => {
   taskInput.value = '';
   resetResult();
-  status.classList.add('hidden');
+  statusPanel.classList.add('hidden');
   taskInput.focus();
 });
 taskInput.addEventListener('keydown', (event) => {
