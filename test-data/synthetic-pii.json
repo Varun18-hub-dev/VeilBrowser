@@ -1,0 +1,15 @@
+{
+  "description": "Synthetic PII fixture data for VeilBrowse privacy testing and test verification. All data is artificial.",
+  "syntheticRecords": [
+    {
+      "category": "personal_profile",
+      "fullName": "Ajay Mehra",
+      "email": "ajay.mehra@example.com",
+      "phone": "+91 98765 43210",
+      "address": "12/B Lotus Lane, Bandra West, Mumbai 400050",
+      "accountId": "VB-7729-AJAY-001",
+      "currentPassword": "SuperSecretP@ssw0rd!123",
+      "newPassword": "AnotherSecretPassword#456"
+    }
+  ]
+}

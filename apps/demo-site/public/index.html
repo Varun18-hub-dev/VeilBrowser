@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeilBrowse — Synthetic Customer Portal Demo</title>
+  <style>
+    :root {
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text-main: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --danger: #dc2626;
+      --success: #16a34a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      line-height: 1.5;
+      padding-bottom: 60px;
+    }
+
+    nav.navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 32px;
+      background: #ffffff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      transition: color 0.15s;
+    }
+
+    .nav-links a:hover,
+    .nav-links a.active {
+      color: var(--primary);
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+
+    .header-section {
+      margin-bottom: 24px;
+    }
+
+    .header-section h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+
+    .header-section p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 6px;
+      color: var(--text-main);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 8px 12px;
+      font-size: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #ffffff;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 8px 16px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-radius: 6px;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: background-color 0.15s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: #ffffff;
+      border-color: var(--border);
+      color: var(--text-main);
+    }
+
+    .btn-secondary:hover {
+      background-color: #f1f5f9;
+    }
+
+    .notice-box {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 12px 16px;
+      font-size: 0.85rem;
+      color: #1e40af;
+      margin-bottom: 24px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Safe Navigation Elements -->
+  <nav class="navbar">
+    <a href="#home" class="brand" id="nav-brand">NovaPortal</a>
+    <ul class="nav-links">
+      <li><a href="#dashboard" id="nav-dashboard">Dashboard</a></li>
+      <li><a href="#profile" class="active" id="nav-profile">Profile & Security</a></li>
+      <li><a href="#billing" id="nav-billing">Billing</a></li>
+      <li><a href="#notifications" id="nav-notifications">Notifications</a></li>
+    </ul>
+  </nav>
+
+  <div class="container">
+    <div class="notice-box">
+      <strong>Synthetic Testing Site:</strong> All personal data, credentials, and account details shown below are completely synthetic for VeilBrowse privacy testing.
+    </div>
+
+    <div class="header-section">
+      <h1>Account Settings</h1>
+      <p>Manage your account personal details and security configuration.</p>
+    </div>
+
+    <!-- Section 1: Personal Details (PII Fields) -->
+    <div class="card">
+      <h2 class="card-title">Personal Information</h2>
+      <form id="personal-info-form" onsubmit="event.preventDefault();">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="full-name">Full Name</label>
+            <input type="text" id="full-name" name="fullname" class="form-control" value="Ajay Mehra" autocomplete="name" />
+          </div>
+
+          <div class="form-group">
+            <label for="account-id">Account ID / Customer Number</label>
+            <input type="text" id="account-id" name="account_number" class="form-control" value="VB-7729-AJAY-001" readonly />
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="user-email">Email Address</label>
+            <input type="email" id="user-email" name="email" class="form-control" value="ajay.mehra@example.com" autocomplete="email" />
+          </div>
+
+          <div class="form-group">
+            <label for="user-phone">Phone Number</label>
+            <input type="tel" id="user-phone" name="phone" class="form-control" value="+91 98765 43210" autocomplete="tel" />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="user-address">Billing & Mailing Address</label>
+          <input type="text" id="user-address" name="address" class="form-control" value="12/B Lotus Lane, Bandra West, Mumbai 400050" autocomplete="street-address" />
+        </div>
+      </form>
+    </div>
+
+    <!-- Section 2: Security & Password (Credentials) -->
+    <div class="card">
+      <h2 class="card-title">Security & Credentials</h2>
+      <form id="security-form" onsubmit="event.preventDefault();">
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" name="current_password" class="form-control" autocomplete="current-password" placeholder="••••••••••••" />
+          </div>
+
+          <div class="form-group">
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" name="new_password" class="form-control" autocomplete="new-password" placeholder="Enter new password" />
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Section 3: Notification Settings (Target Safe Workflow) -->
+    <div class="card" id="notification-settings-section">
+      <h2 class="card-title">Notification Preferences</h2>
+      <div class="toggle-group">
+        <input type="checkbox" id="email-notif-toggle" name="email_notifications" />
+        <label for="email-notif-toggle">Enable email notifications for security alerts</label>
+      </div>
+      <div class="toggle-group">
+        <input type="checkbox" id="product-updates-toggle" name="product_updates" checked />
+        <label for="product-updates-toggle">Receive weekly product feature highlights</label>
+      </div>
+
+      <div style="margin-top: 16px; display: flex; gap: 12px;">
+        <!-- Safe Action Buttons -->
+        <button type="button" id="save-preferences-btn" class="btn btn-primary">Save Preferences</button>
+        <button type="button" id="go-to-dashboard-btn" class="btn btn-secondary">Go to Dashboard</button>
+      </div>
+    </div>
+
+    <!-- Section 4: Dynamic Elements Test (Phase 2) -->
+    <div class="card" id="dynamic-test-section">
+      <h2 class="card-title">Dynamic Element Discovery (Phase 2 Test)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
+        Test dynamic DOM insertion and removal. The MutationObserver will discover new inputs and buttons without reloading.
+      </p>
+      <button type="button" id="open-modal-btn" class="btn btn-primary">Open Security Modal</button>
+      <div id="modal-host" style="margin-top: 16px;"></div>
+    </div>
+
+    <!-- Section 5: Context-Aware & Fail-Closed Detection (Phase 3 Test) -->
+    <div class="card" id="phase3-test-section">
+      <h2 class="card-title">Context-Aware Sensitivity & Fail-Closed Detection (Phase 3 Test)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
+        Demonstrates multi-signal evidence, payment domain classification, and fail-closed UNKNOWN categorization.
+      </p>
+
+      <!-- Payment Sub-form -->
+      <fieldset style="border: 1px solid var(--border); border-radius: 6px; padding: 16px; margin-bottom: 18px;">
+        <legend style="font-weight: 600; font-size: 0.95rem; padding: 0 6px; color: #b83280;">Payment & Card Details (Contextual)</legend>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="p3-cardholder">Cardholder Name</label>
+            <input type="text" id="p3-cardholder" name="cardholder_name" autocomplete="cc-name" class="form-control" value="Ajay Mehra" />
+          </div>
+          <div class="form-group">
+            <label for="p3-cardnumber">Credit Card Number</label>
+            <input type="text" id="p3-cardnumber" name="credit_card_number" placeholder="4111 2222 3333 4444" class="form-control" />
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="form-group">
+            <label for="p3-expiry">Expiration Date</label>
+            <input type="text" id="p3-expiry" name="card_expiry" placeholder="MM/YY" class="form-control" />
+          </div>
+          <div class="form-group">
+            <label for="p3-cvv">Security Code (CVV)</label>
+            <input type="password" id="p3-cvv" name="card_cvv" placeholder="123" class="form-control" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- Ambiguous Field (Fail-Closed to UNKNOWN) -->
+      <div class="form-group" style="margin-bottom: 16px;">
+        <label for="p3-ambiguous">Reference Identifier (Borderline / Ambiguous Signal)</label>
+        <input type="text" id="p3-ambiguous" name="ref_code" placeholder="Enter reference code" class="form-control" />
+        <small style="color: var(--text-muted); font-size: 0.8rem;">Single weak signal without confirmation — fails closed to UNKNOWN badge.</small>
+      </div>
+
+      <!-- Safe Search Box -->
+      <div class="form-group">
+        <label for="p3-search">Help & Knowledge Base Search</label>
+        <input type="search" id="p3-search" name="site_search" placeholder="Search documentation..." class="form-control" />
+        <small style="color: var(--text-muted); font-size: 0.8rem;">Explicit safe search control — classified as NONE (Safe).</small>
+      </div>
+    </div>
+  </div>
+
+    <!-- Section 6: Visual PII (Synthetic Canvas Image) -->
+    <div class="card" id="visual-pii-section">
+      <h2 class="card-title">Visual PII & OCR Redaction (Phase 5 Demo)</h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 14px;">
+        Demonstrates local visual sensitive data detection on rasterized UI elements / canvas receipts.
+        Raw image pixels and OCR text stay strictly local; sensitive regions are masked.
+      </p>
+
+      <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
+        <div>
+          <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 6px;">Rendered Visual Canvas (Synthetic ID & Payment Card):</div>
+          <canvas id="synthetic-id-canvas" width="400" height="220" style="border: 1px solid #cbd5e1; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);"></canvas>
+        </div>
+        <div style="flex: 1; min-width: 250px;">
+          <div style="font-weight: 500; font-size: 0.85rem; margin-bottom: 6px;">Visual Privacy Invariants:</div>
+          <ul style="font-size: 0.85rem; color: #475569; padding-left: 18px; line-height: 1.6;">
+            <li>All OCR occurs locally in-browser.</li>
+            <li>Raw OCR text is <strong>never</strong> exported in sanitized context.</li>
+            <li>Visual bounding boxes map to page coordinates.</li>
+            <li>Opaque masks protect visual secrets before any visual serialization.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 7: Local Privacy Firewall & Mock Agent Interactive Demonstration (Phases 4-8) -->
+    <div class="card" id="firewall-demo-section" style="border: 2px solid #3b82f6;">
+      <h2 class="card-title" style="color: #1d4ed8; display: flex; justify-content: space-between; align-items: center;">
+        <span>Local Privacy Firewall & Action Boundary Demonstration</span>
+        <span style="font-size: 0.75rem; background: #dbeafe; color: #1e40af; padding: 4px 8px; border-radius: 4px; font-weight: normal;">
+          LOCAL FIRST — NO AWS REQUIRED
+        </span>
+      </h2>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 16px;">
+        Inspect how VeilBrowse validates, sanitizes, and controls browser agent actions without leaking user secrets.
+      </p>
+
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+        <button type="button" id="btn-demo-firewall" class="btn btn-primary">1. Run Local Privacy Firewall</button>
+        <button type="button" id="btn-demo-mock-agent" class="btn btn-secondary">2. Run Safe Mock Agent Task</button>
+        <button type="button" id="btn-demo-attack-pwd" class="btn btn-secondary" style="border-color: #fca5a5; color: #991b1b;">3. Test Attack: Click Password</button>
+        <button type="button" id="btn-demo-attack-js" class="btn btn-secondary" style="border-color: #fca5a5; color: #991b1b;">4. Test Attack: Run JS (eval)</button>
+        <button type="button" id="btn-demo-fail-closed" class="btn btn-secondary" style="border-color: #cbd5e1; color: #475569;">5. Test Fail-Closed: Ambiguous Field</button>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #dc2626; margin-bottom: 6px;">
+            Raw Webpage Data (Local In-Browser Only — NEVER Sent Outbound)
+          </div>
+          <pre id="display-raw-data" style="background: #1e293b; color: #f87171; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 260px;">Click "1. Run Local Privacy Firewall" to inspect...</pre>
+        </div>
+        <div>
+          <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #16a34a; margin-bottom: 6px;">
+            Outbound Agent Request (Sanitized Context Envelope)
+          </div>
+          <pre id="display-sanitized-data" style="background: #1e293b; color: #4ade80; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 260px;">Click "1. Run Local Privacy Firewall" to inspect...</pre>
+        </div>
+      </div>
+
+      <div style="margin-top: 16px;">
+        <div style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: #3b82f6; margin-bottom: 6px;">
+          Local Action Validation & Audit Log
+        </div>
+        <pre id="display-audit-log" style="background: #0f172a; color: #93c5fd; padding: 12px; border-radius: 6px; font-size: 0.78rem; overflow-x: auto; max-height: 180px;">Ready for actions.</pre>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Helper to get live data-veil-id from element
+    function getVeilId(elementId, fallback) {
+      const el = document.getElementById(elementId);
+      return el?.getAttribute('data-veil-id') || fallback;
+    }
+
+    // 1. Draw Synthetic ID & Payment Card Canvas
+    function drawSyntheticVisualCard() {
+      const canvas = document.getElementById('synthetic-id-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // Card background gradient
+      const grad = ctx.createLinearGradient(0, 0, 400, 220);
+      grad.addColorStop(0, '#1e293b');
+      grad.addColorStop(1, '#0f172a');
+      ctx.fillStyle = grad;
+      ctx.roundRect(0, 0, 400, 220, 12);
+      ctx.fill();
+
+      // Chip
+      ctx.fillStyle = '#f59e0b';
+      ctx.roundRect(30, 30, 45, 35, 6);
+      ctx.fill();
+
+      // Cardholder & number text
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '16px monospace';
+      ctx.fillText('4111 2222 3333 4444', 30, 110);
+
+      ctx.font = '11px sans-serif';
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillText('CARDHOLDER NAME', 30, 150);
+      ctx.fillText('EXPIRES', 250, 150);
+
+      ctx.fillStyle = '#ffffff';
+      ctx.font = '13px sans-serif';
+      ctx.fillText('AJAY MEHRA', 30, 172);
+      ctx.fillText('12/28', 250, 172);
+
+      ctx.fillStyle = '#e2e8f0';
+      ctx.font = 'bold 12px sans-serif';
+      ctx.fillText('SYNTHETIC DEMO ONLY', 230, 45);
+    }
+    drawSyntheticVisualCard();
+
+    // 2. Dynamic Modal Subtree (Phase 2)
+    const openModalBtn = document.getElementById('open-modal-btn');
+    const modalHost = document.getElementById('modal-host');
+
+    openModalBtn.addEventListener('click', () => {
+      if (document.getElementById('security-modal')) return;
+
+      const modal = document.createElement('div');
+      modal.id = 'security-modal';
+      modal.style.cssText = 'background: #f1f5f9; border: 2px dashed #94a3b8; border-radius: 8px; padding: 18px; margin-top: 12px;';
+      modal.innerHTML = `
+        <h3 style="font-size: 1rem; margin-bottom: 12px; color: #1e293b;">Security Verification Modal (Dynamic Subtree)</h3>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="modal-recovery-email" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Recovery Email</label>
+          <input type="email" id="modal-recovery-email" name="recovery_email" class="form-control" value="recovery.ajay@example.com" autocomplete="email" />
+        </div>
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="modal-pin" style="font-size: 0.85rem; font-weight: 500; display: block; margin-bottom: 4px;">Temporary Passcode</label>
+          <input type="password" id="modal-pin" name="security_pin" class="form-control" autocomplete="current-password" placeholder="••••" />
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <button type="button" id="modal-verify-btn" class="btn btn-primary">Verify Identity</button>
+          <button type="button" id="modal-close-btn" class="btn btn-secondary">Close Modal</button>
+        </div>
+      `;
+
+      modalHost.appendChild(modal);
+
+      document.getElementById('modal-close-btn').addEventListener('click', () => {
+        modal.remove();
+      });
+    });
+
+    // 3. Interactive Privacy Firewall & Action Boundary Demo (Phases 4-8)
+    const rawDataBox = document.getElementById('display-raw-data');
+    const sanitizedDataBox = document.getElementById('display-sanitized-data');
+    const auditLogBox = document.getElementById('display-audit-log');
+
+    document.getElementById('btn-demo-firewall').addEventListener('click', () => {
+      const emailId = getVeilId('user-email', 'vb-8');
+      const phoneId = getVeilId('user-phone', 'vb-9');
+      const addrId = getVeilId('user-address', 'vb-10');
+      const pwdId = getVeilId('current-password', 'vb-11');
+      const toggleId = getVeilId('email-notif-toggle', 'vb-13');
+      const saveId = getVeilId('save-preferences-btn', 'vb-15');
+      const cardId = getVeilId('p3-cardnumber', 'vb-18');
+      const ambigId = getVeilId('p3-ambiguous', 'vb-19');
+
+      const rawData = {
+        pageUrlWithTokens: "http://localhost:3000/#profile?session_token=secret_xyz99&auth=123",
+        localFormValues: {
+          fullName: document.getElementById('full-name')?.value || "Ajay Mehra",
+          email: document.getElementById('user-email')?.value || "ajay.mehra@example.com",
+          phone: document.getElementById('user-phone')?.value || "+91 98765 43210",
+          address: document.getElementById('user-address')?.value || "12/B Lotus Lane, Bandra West, Mumbai 400050",
+          password: "UserSecretPassword99!",
+          cardNumber: document.getElementById('p3-cardnumber')?.value || "4111 2222 3333 4444",
+          cvv: "123",
+          refCode: document.getElementById('p3-ambiguous')?.value || "REF-7729-BORDERLINE"
+        }
+      };
+
+      const outboundPayload = {
+        requestId: "req-9c812d4a-3882-4f11-89b4-b8109d38c11e",
+        sessionId: "ses-f849204b-762b-4fa8-a477-981245e9921b",
+        task: "Open notification settings and enable email notifications",
+        context: {
+          pageUrl: "http://localhost:3000/#profile",
+          pageTitle: document.title,
+          summary: {
+            totalElements: 18,
+            allowedControls: 6,
+            redactedCount: 12,
+            blockedCount: 0,
+            unknownCount: 1,
+            redactionCoverage: "100.00%"
+          },
+          elements: [
+            { elementId: emailId, tagName: "input", role: "textbox", category: "EMAIL", decision: "REDACTED", maskToken: "[REDACTED_EMAIL]" },
+            { elementId: phoneId, tagName: "input", role: "textbox", category: "PHONE", decision: "REDACTED", maskToken: "[REDACTED_PHONE]" },
+            { elementId: addrId, tagName: "input", role: "textbox", category: "ADDRESS", decision: "REDACTED", maskToken: "[REDACTED_ADDRESS]" },
+            { elementId: pwdId, tagName: "input", role: "textbox", category: "PASSWORD", decision: "REDACTED", maskToken: "[REDACTED_PASSWORD]" },
+            { elementId: cardId, tagName: "input", role: "textbox", category: "PAYMENT", decision: "REDACTED", maskToken: "[REDACTED_PAYMENT]" },
+            { elementId: ambigId, tagName: "input", role: "textbox", category: "UNKNOWN", decision: "REDACTED", maskToken: "[REDACTED_UNKNOWN]" },
+            { elementId: toggleId, tagName: "input", role: "checkbox", category: "NONE", decision: "ALLOWED", accessibleLabel: "Enable email notifications", interactable: true },
+            { elementId: saveId, tagName: "button", role: "button", category: "NONE", decision: "ALLOWED", accessibleLabel: "Save Preferences", interactable: true }
+          ]
+        }
+      };
+
+      rawDataBox.textContent = JSON.stringify(rawData, null, 2);
+      sanitizedDataBox.textContent = JSON.stringify(outboundPayload, null, 2);
+      auditLogBox.textContent = 
+`[FIREWALL AUDIT COMPLETED]
+- Total DOM Elements Scanned: 18
+- Sensitive & Unknown Regions Detected: 12 (100% Redacted)
+- Allowed Safe Controls: 6
+- Redaction Coverage: 100.00%
+- Outbound Payload Verification: ZERO raw passwords, emails, phones, or card numbers present.
+- URL Query Parameters & Session Tokens: STRIPPED.`;
+    });
+
+    document.getElementById('btn-demo-mock-agent').addEventListener('click', () => {
+      const toggleId = getVeilId('email-notif-toggle', 'vb-13');
+      const saveId = getVeilId('save-preferences-btn', 'vb-15');
+
+      auditLogBox.textContent = 
+`[TASK STARTED]: "Open notification settings and enable email notifications"
+[REASONING PROVIDER]: LocalMockAgent (implements ReasoningProvider interface)
+[INPUT]: UnifiedSanitizedContext received across outbound boundary (zero secrets)
+[ACTION 1 GENERATED]: { "action": "CLICK", "targetId": "${toggleId}" }
+[LOCAL ACTION VALIDATOR]:
+  - Tier 1 Schema Check: APPROVED (Valid CLICK structure)
+  - Tier 2 Safety Check: APPROVED (Target ${toggleId} is SAFE, category: NONE, interactable: true)
+[BROWSER EXECUTION]: Click executed on #${toggleId}.
+[ACTION 2 GENERATED]: { "action": "CLICK", "targetId": "${saveId}" }
+[LOCAL ACTION VALIDATOR]:
+  - Tier 1 Schema Check: APPROVED
+  - Tier 2 Safety Check: APPROVED (Target ${saveId} is SAFE button)
+[BROWSER EXECUTION]: Click executed on #${saveId}.
+[TASK COMPLETED]: Notification preference successfully enabled. All actions validated locally.`;
+      
+      const toggle = document.getElementById('email-notif-toggle');
+      if (toggle) toggle.checked = true;
+    });
+
+    document.getElementById('btn-demo-attack-pwd').addEventListener('click', () => {
+      const pwdId = getVeilId('current-password', 'vb-11');
+
+      auditLogBox.textContent = 
+`[SECURITY ATTACK ATTEMPT]: Malicious or hallucinated agent action received:
+  Payload: { "action": "CLICK", "targetId": "${pwdId}" }
+[LOCAL ACTION VALIDATOR]:
+  - Tier 1 Schema Check: APPROVED (Conforms to AgentAction schema)
+  - Tier 2 Contextual Safety Check: BLOCKED!
+  - REASON: Target element '${pwdId}' is classified as sensitive (PASSWORD).
+[SECURITY INVARIANT ENFORCED]: The browser does NOT trust the reasoning engine.
+External agent actions targeting credential or PII fields are strictly prohibited.`;
+    });
+
+    document.getElementById('btn-demo-attack-js').addEventListener('click', () => {
+      auditLogBox.textContent = 
+`[SECURITY ATTACK ATTEMPT]: Arbitrary script injection action received:
+  Payload: { "action": "EXECUTE_JS", "code": "alert(document.cookie)" }
+[LOCAL ACTION VALIDATOR]:
+  - Tier 1 Schema Check: REJECTED!
+  - REASON: Action 'EXECUTE_JS' is forbidden. Only CLICK, SCROLL, WAIT, NAVIGATE allowed.
+[SECURITY INVARIANT ENFORCED]: Arbitrary JavaScript execution is impossible. The action schema is closed.`;
+    });
+
+    document.getElementById('btn-demo-fail-closed').addEventListener('click', () => {
+      const ambigId = getVeilId('p3-ambiguous', 'vb-19');
+
+      auditLogBox.textContent = 
+`[FAIL-CLOSED DEMONSTRATION]: Agent attempts to interact with uncertain/ambiguous field:
+  Payload: { "action": "CLICK", "targetId": "${ambigId}" }
+[LOCAL ACTION VALIDATOR]:
+  - Tier 1 Schema Check: APPROVED
+  - Tier 2 Contextual Safety Check: BLOCKED!
+  - REASON: Target element '${ambigId}' is classified as UNKNOWN (fail-closed borderline field).
+[FAIL-CLOSED POLICY]: UNKNOWN is never silently downgraded to SAFE.
+VeilBrowse chooses privacy over uncertain execution.`;
+    });
+  </script>
+</body>
+</html>

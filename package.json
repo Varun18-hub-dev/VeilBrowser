@@ -1,0 +1,18 @@
+{
+  "name": "veilbrowse",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:extension": "npm run build --workspace=apps/extension",
+    "test:extension": "npm run test --workspace=apps/extension",
+    "typecheck:extension": "npm run typecheck --workspace=apps/extension",
+    "start:demo": "npm run start --workspace=apps/demo-site",
+    "benchmark": "npm run test:extension -- src/__tests__/benchmark.test.ts",
+    "build": "npm run build:extension",
+    "test": "npm run test:extension"
+  }
+}

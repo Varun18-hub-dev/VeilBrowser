@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeilBrowse</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: #0f1117;
+      color: #e2e8f0;
+      width: 300px;
+      padding: 16px;
+      min-height: 160px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #2d3748;
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.3px;
+    }
+
+    .logo span { color: #63b3ed; }
+
+    .status-pill {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      padding: 2px 8px;
+      border-radius: 99px;
+      text-transform: uppercase;
+    }
+
+    .status-pill.active   { background: #276749; color: #9ae6b4; }
+    .status-pill.inactive { background: #2d3748; color: #718096; }
+
+    .summary-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .stat {
+      flex: 1;
+      background: #1a202c;
+      border-radius: 6px;
+      padding: 10px 12px;
+    }
+
+    .stat-num {
+      font-size: 24px;
+      font-weight: 800;
+      color: #fff;
+      line-height: 1;
+      margin-bottom: 3px;
+    }
+
+    .stat-num.warn { color: #fc8181; }
+
+    .stat-label {
+      font-size: 10px;
+      color: #718096;
+      font-weight: 500;
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: #4a5568;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin-bottom: 6px;
+    }
+
+    .type-list { display: flex; flex-direction: column; gap: 4px; }
+
+    .type-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1a202c;
+      border-radius: 5px;
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    .type-name {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      color: #a0aec0;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .type-count { font-weight: 700; color: #e2e8f0; }
+
+    .idle-msg {
+      text-align: center;
+      color: #718096;
+      font-size: 12px;
+      padding: 16px 0;
+      line-height: 1.6;
+    }
+
+    .idle-msg code {
+      font-size: 11px;
+      color: #63b3ed;
+      background: #1a202c;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .footer {
+      margin-top: 14px;
+      padding-top: 10px;
+      border-top: 1px solid #1a202c;
+      font-size: 10px;
+      color: #2d3748;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">Veil<span>Browse</span></div>
+    <div class="status-pill inactive" id="status-pill">…</div>
+  </div>
+
+  <div id="content">
+    <div class="idle-msg">Loading…</div>
+  </div>
+
+  <div class="footer">Privacy Firewall · Phase 1 · localhost only</div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

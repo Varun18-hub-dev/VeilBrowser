@@ -1,0 +1,41 @@
+{
+  "timestamp": "2026-09-20T12:42:54.593Z",
+  "environment": {
+    "nodeVersion": "v22.14.0",
+    "platform": "win32"
+  },
+  "detectionMetrics": {
+    "totalTestCases": 23,
+    "truePositives": 17,
+    "trueNegatives": 6,
+    "falsePositives": 0,
+    "falseNegatives": 0,
+    "precision": 1,
+    "recall": 1,
+    "f1Score": 1
+  },
+  "redactionMetrics": {
+    "totalSensitiveRegions": 13,
+    "detectedRegions": 17,
+    "redactedRegions": 13,
+    "blockedRegions": 0,
+    "missedRegions": 0,
+    "redactionCoverage": 1
+  },
+  "latencyMetrics": {
+    "domClassificationAvgMs": 0.389,
+    "visualScanAvgMs": 0.6,
+    "firewallSanitizationMs": 2,
+    "endToEndWorkflowMs": 1
+  },
+  "resourceMetrics": {
+    "heapUsedMB": 0.67,
+    "heapTotalMB": 203.82,
+    "rssMB": 243.28
+  },
+  "privacyViolations": {
+    "totalEvaluatedSecrets": 18,
+    "violationsDetected": 0,
+    "status": "CLEAN"
+  }
+}
