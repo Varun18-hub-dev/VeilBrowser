@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeilBrowse Agent</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8fafc;color:#0f172a}
+.wrap{padding:20px 16px}.brand{display:flex;align-items:center;gap:10px;margin-bottom:24px}.logo{width:34px;height:34px;border-radius:10px;background:#2563eb;color:#fff;display:grid;place-items:center;font-size:18px}.brand h1{font-size:18px;margin:0}.brand p{font-size:11px;color:#64748b;margin:2px 0 0}
+.label{font-size:11px;font-weight:700;color:#475569;margin-bottom:7px}.task{width:100%;min-height:105px;resize:vertical;border:1px solid #cbd5e1;border-radius:12px;padding:12px;font:14px inherit;outline:none;background:#fff}.task:focus{border-color:#2563eb;box-shadow:0 0 0 3px #dbeafe}
+.run{width:100%;margin-top:10px;border:0;border-radius:10px;padding:11px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer}.run:disabled{background:#94a3b8;cursor:not-allowed}
+.status{margin-top:16px;border:1px solid #e2e8f0;background:#fff;border-radius:12px;padding:14px}.row{display:flex;align-items:center;gap:9px}.dot{width:9px;height:9px;border-radius:50%;background:#22c55e}.dot.busy{background:#2563eb;animation:pulse 1s infinite}.dot.error{background:#ef4444}@keyframes pulse{50%{opacity:.35}}.state{font-size:13px;font-weight:700}.detail{font-size:11px;color:#64748b;margin-top:5px;line-height:1.45}
+.privacy{margin-top:10px;padding:10px;border-radius:9px;background:#eff6ff;color:#1e40af;font-size:11px;line-height:1.45}.result{margin-top:10px;padding:11px;border-radius:9px;background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;font-size:12px;line-height:1.45}.new{width:100%;margin-top:9px;padding:9px;border:1px solid #bfdbfe;background:#fff;color:#2563eb;border-radius:9px;font-weight:650;cursor:pointer}.hidden{display:none}
+.footer{margin-top:24px;text-align:center;color:#94a3b8;font-size:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><div class="logo">🛡</div><div><h1>VeilBrowse</h1><p>Private AI Browser Agent</p></div></div>
+  <div class="label">What would you like me to do?</div>
+  <textarea id="task" class="task" placeholder="e.g. Enable email notifications"></textarea>
+  <button id="run" class="run">Run Agent</button>
+  <div id="status" class="status hidden">
+    <div class="row"><span id="dot" class="dot busy"></span><span id="state" class="state">Working...</span></div>
+    <div id="detail" class="detail">The agent is processing the current page.</div>
+    <div id="privacy" class="privacy hidden">🔒 Privacy protection is active. Sensitive information stays protected locally before AI reasoning.</div>
+    <div id="result" class="result hidden"></div>
+    <button id="new" class="new hidden">New instruction</button>
+  </div>
+  <div class="footer">Privacy firewall active · Qwen 2.5 3B local reasoning</div>
+</div>
+<script src="sidepanel.js"></script>
+</body>
+</html>
