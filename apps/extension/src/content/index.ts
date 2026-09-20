@@ -22,7 +22,7 @@ import {
  * 1. Maintain continuous PageScanner (open shadow DOM, rAF batching, loop-prevention).
  * 2. Enforce local privacy firewall (prepareSanitizedContext, visual masking, opaque IDs).
  * 3. Provide secure message bridge between demo page UI and extension:
- *    - RUN_AGENT_TASK -> local firewall -> LocalMockAgent -> 2-tier validator -> execute safe action
+ *    - RUN_AGENT_TASK -> local firewall -> Qwen/Ollama -> 2-tier validator -> execute safe action
  *    - TEST_SENSITIVE_ATTACK -> 2-tier validator -> BLOCKED (fail-closed)
  *    - TEST_EXECUTE_JS_ATTACK -> 1-tier validator -> REJECTED (schema guard)
  *    - TEST_UNKNOWN_TARGET -> 2-tier validator -> BLOCKED (fail-closed)
@@ -94,7 +94,7 @@ try {
 // Broadcast extension readiness
 postToPage({
   type: 'EXTENSION_INITIALIZED',
-  providerId: 'local-mock-agent',
+  providerId: 'ollama-qwen2.5:3b',
 });
 
 function getDomElementByVeilId(id: string): HTMLElement | null {
@@ -106,13 +106,13 @@ function getDomElementByVeilId(id: string): HTMLElement | null {
  * 1. Read task
  * 2. Local privacy firewall inspects & sanitizes DOM
  * 3. Outbound UnifiedSanitizedContext prepared
- * 4. LocalMockAgent (ReasoningProvider) plans actions
+ * 4. Qwen 2.5 via Ollama (ReasoningProvider) plans actions
  * 5. Tier 1 schema validation
  * 6. Tier 2 contextual validation
  * 7. Browser execution only if approved
  * 8. Status and result updates
  */
-async function runAgentPipeline(task: string, providerChoice: string = 'mock'): Promise<void> {
+async function runAgentPipeline(task: string, providerChoice: string = 'qwen'): Promise<void> {
   try {
     // 1. ANALYZING PAGE
     postToPage({
@@ -406,7 +406,7 @@ window.addEventListener('message', async (event: MessageEvent) => {
     postToPage({
       type: 'PONG',
       ready: true,
-      providerId: 'local-mock-agent',
+      providerId: 'ollama-qwen2.5:3b',
     });
     return;
   }
