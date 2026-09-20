@@ -150,69 +150,12 @@
   </nav>
 
   <div class="container">
-    <div class="notice-box">
-      <strong>Synthetic Testing Site:</strong> All personal data, credentials, and account details shown below are completely synthetic for VeilBrowse privacy testing.
-    </div>
-
-    <!-- ================================================================ -->
-    <!-- USER-FACING AI AGENT — INTERNAL PRIVACY/REASONING DETAILS HIDDEN -->
-    <!-- ================================================================ -->
-    <div class="agent-panel" id="agent-panel">
-      <div class="agent-header">
-        <h2>🛡️ VeilBrowse AI Browser Agent</h2>
-        <div class="agent-subtitle">Tell me what you want to do. I'll handle the browser privately.</div>
-      </div>
-
-      <div class="agent-task-row">
-        <input type="text" id="agent-task-input" class="agent-task-input"
-               value="Open notification settings and enable email notifications."
-               placeholder="What would you like me to do?" autocomplete="off" />
-        <button type="button" id="btn-run-agent" class="btn-run-agent">✨ Run Agent</button>
-      </div>
-
-      <div class="agent-progress" id="agent-progress">
-        <div class="agent-state">
-          <div class="agent-spinner" id="agent-spinner"></div>
-          <div>
-            <div class="agent-state-text" id="agent-status-text">Working...</div>
-            <div class="agent-detail" id="agent-current-step">Processing your request...</div>
-          </div>
-        </div>
-        <div class="privacy-card" id="privacy-card">
-          🔒 <strong>Privacy protection active</strong> — sensitive information is being protected locally before any AI reasoning.
-          <span id="privacy-summary"></span>
-        </div>
-      </div>
-
-      <div class="agent-result" id="agent-result">
-        <div class="agent-result-title" id="agent-result-title">✓ Task completed</div>
-        <div class="agent-result-detail" id="agent-result-detail">Your request was completed successfully.</div>
-        <button type="button" id="btn-new-task" class="agent-new-task">New instruction</button>
-      </div>
-
-      <!-- Kept for developer/security testing; intentionally invisible in normal UX. -->
-      <div class="developer-only">
-        <select id="select-provider"><option value="qwen" selected>Qwen</option></select>
-        <div id="privacy-stats">
-          <span id="stat-scanned">—</span><span id="stat-sensitive">—</span>
-          <span id="stat-redacted">—</span><span id="stat-safe">—</span><span id="stat-pii">0</span>
-        </div>
-        <div id="execution-log"></div>
-        <div class="expandable-section">
-          <span id="sanitized-context-view"></span><span id="agent-decision-view"></span><span id="validation-view"></span>
-        </div>
-        <button id="btn-test-sensitive"></button>
-        <button id="btn-test-js"></button>
-        <button id="btn-test-unknown"></button>
-      </div>
-    </div>
-
     <!-- Simple user-facing browser page. Privacy test fixtures remain in the DOM but are hidden. -->
     <!-- ================================================================ -->
 
     <div class="header-section">
-      <h1>Account Settings</h1>
-      <p>Manage your account personal details and security configuration.</p>
+      <h1>Notification Preferences</h1>
+      <p>Manage how you receive updates and security alerts.</p>
     </div>
 
     <div class="card" id="notification-settings-section">
