@@ -2,6 +2,7 @@ import { PageScanner } from './scanner';
 import { applyOverlay } from './overlay';
 import { runPrivacyFirewall } from './firewall';
 import { LocalMockAgent } from './mock-agent';
+import { OllamaReasoningProvider } from './ollama-provider';
 import { validateActionSchema, validateAction, executeAction } from './action-validator';
 import {
   SensitiveElementType,
@@ -111,7 +112,7 @@ function getDomElementByVeilId(id: string): HTMLElement | null {
  * 7. Browser execution only if approved
  * 8. Status and result updates
  */
-async function runAgentPipeline(task: string): Promise<void> {
+async function runAgentPipeline(task: string, providerChoice: string = 'mock'): Promise<void> {
   try {
     // 1. ANALYZING PAGE
     postToPage({
@@ -136,16 +137,22 @@ async function runAgentPipeline(task: string): Promise<void> {
 
     const sanitizedContext: UnifiedSanitizedContext = runPrivacyFirewall(domScan, null);
 
-    // 3. REASONING
+    // 3. REASONING (Pluggable ReasoningProvider: LocalMockAgent or Ollama Qwen 2.5)
+    const isQwen = providerChoice === 'qwen';
+    const agent = isQwen ? new OllamaReasoningProvider() : new LocalMockAgent();
+
     postToPage({
       type: 'AGENT_STATUS_UPDATE',
       status: 'REASONING',
-      currentStep: 'LocalMockAgent planning actions on sanitized context (zero raw secrets)...',
+      currentStep: isQwen
+        ? 'Ollama Qwen 2.5 3B local LLM reasoning on sanitized context (zero raw secrets)...'
+        : 'LocalMockAgent planning actions on sanitized context (zero raw secrets)...',
     });
     await delay(350);
 
-    const agent = new LocalMockAgent();
-    const plannedActions = agent.planActions(task, sanitizedContext);
+    const plannedActions = isQwen
+      ? await (agent as OllamaReasoningProvider).planActions(task, sanitizedContext)
+      : (agent as LocalMockAgent).planActions(task, sanitizedContext);
 
     const outboundRequest: OutboundAgentRequest = {
       requestId: generateRequestId(),
@@ -232,6 +239,7 @@ async function runAgentPipeline(task: string): Promise<void> {
       postToPage({
         type: 'AGENT_STEP_COMPLETED',
         step: stepIndex,
+        providerId: agent.providerId,
         action,
         policyValidation,
         executionResult: execResult,
@@ -247,6 +255,7 @@ async function runAgentPipeline(task: string): Promise<void> {
       payload: {
         task,
         status: 'COMPLETED',
+        providerId: agent.providerId,
         sanitizedContext,
         outboundRequest,
         plannedActions,
@@ -431,7 +440,8 @@ window.addEventListener('message', async (event: MessageEvent) => {
       typeof payload?.task === 'string' && payload.task.trim().length > 0
         ? payload.task.trim()
         : 'Open notification settings and enable email notifications';
-    await runAgentPipeline(task);
+    const providerChoice = typeof payload?.provider === 'string' ? payload.provider : 'mock';
+    await runAgentPipeline(task, providerChoice);
     return;
   }
 

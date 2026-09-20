@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-20T14:51:40.752Z",
+  "timestamp": "2026-09-20T15:05:36.026Z",
   "environment": {
     "nodeVersion": "v22.14.0",
     "platform": "win32"
@@ -23,15 +23,15 @@
     "redactionCoverage": 1
   },
   "latencyMetrics": {
-    "domClassificationAvgMs": 0.167,
+    "domClassificationAvgMs": 0.222,
     "visualScanAvgMs": 0.4,
     "firewallSanitizationMs": 1,
     "endToEndWorkflowMs": 1
   },
   "resourceMetrics": {
     "heapUsedMB": 0.67,
-    "heapTotalMB": 204.57,
-    "rssMB": 250.58
+    "heapTotalMB": 204.07,
+    "rssMB": 250.02
   },
   "privacyViolations": {
     "totalEvaluatedSecrets": 18,

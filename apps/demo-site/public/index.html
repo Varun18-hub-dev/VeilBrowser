@@ -203,6 +203,20 @@
         The reasoning agent is NOT the security boundary. The browser IS the security boundary.
       </div>
 
+      <!-- Reasoning Provider Selection -->
+      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; background: #1e293b; padding: 10px 14px; border-radius: 8px; border: 1px solid #334155;">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <span style="font-size: 0.8rem; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Reasoning Brain:</span>
+          <select id="select-provider" style="background: #0f172a; color: #60a5fa; border: 1px solid #3b82f6; border-radius: 6px; padding: 6px 12px; font-size: 0.85rem; font-weight: 600; outline: none; cursor: pointer;">
+            <option value="mock" selected>⚡ LocalMockAgent (Instant • Deterministic)</option>
+            <option value="qwen">🧠 Ollama Qwen 2.5 3B (Live Local LLM • 127.0.0.1:11434)</option>
+          </select>
+        </div>
+        <span id="provider-badge" style="font-size: 0.72rem; background: #1e3a5f; color: #93c5fd; padding: 4px 8px; border-radius: 4px; font-weight: 500;">
+          Zero Raw PII Boundary
+        </span>
+      </div>
+
       <!-- Task Input -->
       <div class="agent-task-row">
         <input type="text" id="agent-task-input" class="agent-task-input"
@@ -555,10 +569,11 @@
           'Execution: ' + exec.message;
 
         // Update agent decision view
+        var activeProvider = msg.providerId || 'LocalMockAgent';
         document.getElementById('agent-decision-view').textContent =
           'Agent Action (Step ' + step + '):\n' +
           JSON.stringify(action, null, 2) + '\n\n' +
-          'Provider: LocalMockAgent\n' +
+          'Provider: ' + activeProvider + '\n' +
           'Input: UnifiedSanitizedContext (zero raw secrets)\n' +
           'Raw Sensitive Values: NOT PROVIDED';
         return;
@@ -574,7 +589,7 @@
         appendLog('═══════════════════════════════════════', 'log-ok');
         appendLog('✓ TASK COMPLETED: ' + p.finalResult, 'log-ok');
         appendLog('═══════════════════════════════════════', 'log-ok');
-        appendLog('Provider: LocalMockAgent (ReasoningProvider)', 'log-info');
+        appendLog('Provider: ' + (p.providerId || 'LocalMockAgent') + ' (ReasoningProvider)', 'log-info');
         appendLog('Sensitive Elements Redacted: ' + p.summary.redactedCount, 'log-info');
         appendLog('Outbound PII: ' + p.summary.outboundPii, 'log-info');
 
@@ -670,15 +685,19 @@
       if (!task) { alert('Please enter a task.'); return; }
       if (!extensionReady) { alert('VeilBrowse extension is not connected. Please load the extension and reload this page.'); return; }
 
+      var provider = document.getElementById('select-provider').value;
+      var providerLabel = provider === 'qwen' ? 'Ollama Qwen 2.5 3B (Local LLM)' : 'LocalMockAgent (Deterministic)';
+
       this.disabled = true;
       clearLog();
       setAgentStatus('ANALYZING PAGE');
-      setCurrentStep('Starting agent pipeline...');
+      setCurrentStep('Starting agent pipeline with ' + providerLabel + '...');
       appendLog('[TASK] "' + task + '"', 'log-step');
+      appendLog('[REASONING BRAIN] ' + providerLabel, 'log-action');
       appendLog('[PIPELINE] Task → Privacy Firewall → Sanitized Context → ReasoningProvider → AgentAction → Validator → Browser', 'log-info');
       appendLog('', 'log-info');
 
-      sendToExtension('RUN_AGENT_TASK', { task: task });
+      sendToExtension('RUN_AGENT_TASK', { task: task, provider: provider });
     });
 
     document.getElementById('btn-test-sensitive').addEventListener('click', function() {
