@@ -34,12 +34,21 @@ chrome.runtime.onMessage.addListener(
           ? (message as { targetTabId: number }).targetTabId
           : sender.tab?.id;
 
-      if (typeof targetTabId === 'number') {
-        chrome.tabs.sendMessage(targetTabId, message).catch((err: unknown) => {
-          console.error('[VeilBrowse:background] Failed to reach active tab:', err);
-        });
+      if (typeof targetTabId !== 'number') {
+        sendResponse({ ok: false, error: 'No active browser tab available.' });
+        return undefined;
       }
-      return undefined;
+
+      chrome.tabs
+        .sendMessage(targetTabId, message)
+        .then((response: unknown) => sendResponse(response ?? { ok: true }))
+        .catch((err: unknown) => {
+          const error = err instanceof Error ? err.message : 'Content script is not available on this page.';
+          console.error('[VeilBrowse:background] Failed to reach active tab:', error);
+          sendResponse({ ok: false, error });
+        });
+
+      return true;
     }
 
     if (message.type === 'DOM_SCAN_RESULT') {
