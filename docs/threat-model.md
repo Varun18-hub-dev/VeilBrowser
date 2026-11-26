@@ -56,7 +56,18 @@ VeilBrowse does NOT protect against:
 - The reasoning engine is decoupled via the `ReasoningProvider` interface.
 - Current active provider: `LocalMockAgent` (deterministic, local, rule-based).
 - Future providers: `OllamaReasoningProvider` (local open-source LLM), `BedrockReasoningProvider` (cloud model on AWS).
-- **Status: AWS and Ollama are NOT IMPLEMENTED in this phase.**
+- **Status: Ollama is implemented (local, default). AWS/Bedrock is not implemented.**
+
+### Hostile web page driving the agent
+- **Threat:** a page posts messages to the content script to start tasks, approve its own destructive actions, or read the sanitized context.
+- **Mitigation:** there is no `window.postMessage` bridge. Tasks and confirmations reach the content script only through `chrome.tabs.sendMessage` from the background worker, which accepts them only from extension pages (sender URL is the extension's own origin). Covered by the e2e "hostile page" check.
+
+### Personal data in visible text
+- **Threat:** a label, link or page title such as "Signed in as name@example.com" is allowed through because it is not an input field.
+- **Mitigation:** the outbound PII guard masks emails, phones, card numbers (Luhn-checked), Aadhaar, PAN, IBAN, SSN and UPI IDs in every text field before the model call, and the run is blocked if any remain.
+
+### Model marks a destructive action as safe
+- **Mitigation:** confirmation is triggered by a local check of the target label (delete, pay, send, submit, ...), not only by the model's `isDestructive` flag. The user's answer comes from the side panel; no answer within 60 s counts as "no".
 
 ### D. Future Cloud Session Store (DynamoDB) Data Minimization
 - Permitted in future session storage: `sessionId`, `requestId`, `timestamp`, `taskSummary` (without PII), `actionType`, `validationDecision`, `validationReasons`, `latencyMs`, aggregate `contextSummary`, `stepIndex`.

@@ -37,7 +37,7 @@ BROWSER EXECUTION
    - Actions target elements via `elementId` rather than loose coordinates, preventing accidental interaction with sensitive elements.
 
 3. **Restricted Browser Permissions**:
-   - Manifest V3 permissions are scoped specifically to `http://localhost:3000/*` and minimal browser storage (`storage`, `activeTab`).
+   - Manifest V3 site access is optional (`optional_host_permissions`) and requested per site from the side panel; the content script is injected on demand with `chrome.scripting`. The development build also auto-loads it on the local demo site (`http://localhost:3000/*`); the production build does not.
    - Broad permissions such as `<all_urls>`, arbitrary scripting injection, or network interception are strictly disallowed.
 
 4. **Rule-Based Confidence Scoring**:
@@ -302,7 +302,7 @@ Only four actions are permitted:
                  │                   │                   │
                  ▼                   ▼                   ▼
           LOCAL MOCK AGENT    [FUTURE: OLLAMA]    [FUTURE: BEDROCK]
-         (CURRENTLY ACTIVE)    (NOT IMPLEMENTED)   (NOT IMPLEMENTED)
+         (OFFLINE DEMO)        (IMPLEMENTED)       (NOT IMPLEMENTED)
                  │
                  ▼
                             INBOUND AGENT ACTION
@@ -382,7 +382,7 @@ export interface ReasoningProvider {
 }
 ```
 - **LocalMockAgent**: Currently active deterministic provider.
-- **OllamaReasoningProvider**: *[FUTURE — NOT IMPLEMENTED]* Local open-source LLM provider.
+- **OllamaReasoningProvider**: *[IMPLEMENTED]* Local LLM provider (default `qwen2.5:3b`). Called from the background service worker, step by step, with the history of previous actions.
 - **BedrockReasoningProvider**: *[FUTURE — NOT IMPLEMENTED]* Cloud reasoning provider on AWS.
 
 ### 5. Future Session Store (DynamoDB) Data Minimization Principles
