@@ -13,6 +13,7 @@
     "start:demo": "npm run start --workspace=apps/demo-site",
     "benchmark": "npm run test:extension -- src/__tests__/benchmark.test.ts",
     "build": "npm run build:extension",
-    "test": "npm run test:extension"
+    "test": "npm run test:extension",
+    "package:extension": "npm run package --workspace=apps/extension"
   }
 }

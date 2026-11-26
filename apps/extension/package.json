@@ -6,7 +6,9 @@
     "build": "webpack --config webpack.config.js",
     "build:watch": "webpack --config webpack.config.js --watch",
     "test": "jest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "build:prod": "webpack --config webpack.config.js --mode production",
+    "package": "node scripts/package.js"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.268",
