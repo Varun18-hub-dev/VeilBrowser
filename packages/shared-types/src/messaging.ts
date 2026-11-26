@@ -22,7 +22,16 @@ export type VeilBrowseMessageType =
   | 'AGENT_TASK_COMPLETED'
   | 'CONFIRM_ACTION_REQUEST'
   // Side panel -> background -> content script: the user's answer
-  | 'CONFIRM_ACTION_RESPONSE';
+  | 'CONFIRM_ACTION_RESPONSE'
+  // Side panel -> background: stop the running task / resume after granting site access
+  | 'STOP_AGENT_TASK'
+  | 'RESUME_AGENT_TASK'
+  // Background -> side panel: the task moved to a site VeilBrowse may not read yet
+  | 'NEED_SITE_ACCESS'
+  // Content script -> background: an action is navigating away; resume on the next page
+  | 'AGENT_NAVIGATING'
+  // Content script -> background: screenshot + local vision model (sensitive regions masked)
+  | 'VISUAL_PERCEPTION_REQUEST';
 
 /** Base message — all messages extend this */
 export interface VeilBrowseMessage {
@@ -59,13 +68,33 @@ export type ProviderChoice = 'qwen' | 'mock';
 export interface RunAgentTaskFromPanelMessage extends VeilBrowseMessage {
   type: 'RUN_AGENT_TASK_FROM_PANEL';
   targetTabId: number;
-  payload: { task: string; provider: ProviderChoice };
+  payload: { task: string; provider: ProviderChoice; visual?: boolean };
 }
 
-/** Background -> content script: start the agent loop. */
+export interface VeilBrowseSettings {
+  textModel: string;
+  visionModel: string;
+}
+
+export const DEFAULT_SETTINGS: VeilBrowseSettings = {
+  textModel: 'qwen2.5:3b',
+  visionModel: 'qwen2.5vl:3b',
+};
+
+/** Background -> content script: start (or resume, with history) the agent loop. */
 export interface StartAgentTaskMessage extends VeilBrowseMessage {
   type: 'START_AGENT_TASK';
-  payload: { task: string; provider: ProviderChoice };
+  payload: {
+    task: string;
+    provider: ProviderChoice;
+    visual: boolean;
+    textModel: string;
+    visionModel: string;
+    /** StepRecord[] from earlier pages of the same task. */
+    history: unknown[];
+    piiMasked: number;
+    maxSteps: number;
+  };
 }
 
 /** Content script -> background: one chat call to the local Ollama model.

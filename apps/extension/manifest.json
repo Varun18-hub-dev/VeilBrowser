@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "VeilBrowse",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Privacy firewall for AI browser agents \u2014 detects and protects sensitive information locally before any data leaves the browser.",
   "permissions": [
     "activeTab",
@@ -12,7 +12,8 @@
   ],
   "optional_host_permissions": [
     "https://*/*",
-    "http://*/*"
+    "http://*/*",
+    "<all_urls>"
   ],
   "host_permissions": [
     "http://127.0.0.1:11434/*",

@@ -3,7 +3,7 @@ import {
   type AgentAction,
   type UnifiedSanitizedContext,
 } from '@veilbrowse/shared-types';
-import type { AgentStep, StepProvider, StepRecord } from './agent-loop';
+import type { AgentStep, Observation, StepProvider, StepRecord } from './agent-loop';
 
 export type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
@@ -36,16 +36,19 @@ export function fetchTransport(endpoint: string): ChatTransport {
 
 const SYSTEM_PROMPT =
   'You are a browser agent working through the VeilBrowse privacy firewall.\n' +
-  'You see ONLY sanitized page elements: personal data has been removed and masked fields are marked.\n' +
-  'Each turn, choose ONE next action toward the user task, or say the task is done.\n' +
+  'You see a sanitized page: interactive elements (with ids), visible page text, and sometimes notes from a vision model.\n' +
+  'Personal data has been replaced with placeholders like [REDACTED], [EMAIL], [NAME]. Never try to recover or type them.\n' +
+  'Each turn, choose ONE next action toward the user task, or finish.\n' +
   'Reply with ONE JSON object and nothing else, in one of these forms:\n' +
-  '  {"action": "CLICK", "targetId": "<id from the list>"}\n' +
+  '  {"action": "CLICK", "targetId": "<id>"}\n' +
+  '  {"action": "TYPE", "targetId": "<id of a text field>", "text": "<text>", "submit": true}\n' +
   '  {"action": "SCROLL", "direction": "down"}\n' +
-  '  {"action": "WAIT", "durationMs": 500}\n' +
+  '  {"action": "WAIT", "durationMs": 1000}\n' +
   '  {"action": "NAVIGATE", "url": "https://..."}\n' +
-  '  {"done": true, "summary": "<one sentence on what was achieved>"}\n' +
-  'Only use targetIds from the list. Never target elements whose decision is not ALLOWED.\n' +
-  'If the previous actions already achieved the task, reply done.';
+  '  {"done": true, "summary": "<what was done, or the answer the user asked for>"}\n' +
+  'Rules: only use ids from the element list; never target elements whose decision is not ALLOWED; ' +
+  'if the task asks a question, read the page text and answer it in the summary; ' +
+  'if the previous actions already achieved the task, finish.';
 
 /**
  * OllamaReasoningProvider — local LLM (default Qwen 2.5 3B) through Ollama.
@@ -82,17 +85,25 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
     );
   }
 
-  public buildMessages(task: string, context: UnifiedSanitizedContext, history: StepRecord[]): ChatMessage[] {
+  public buildMessages(task: string, context: UnifiedSanitizedContext, history: StepRecord[], observation?: Observation): ChatMessage[] {
     const past = history.length
-      ? history.map((h) => `${h.step}. ${h.action}${h.targetLabel ? ` "${h.targetLabel}"` : h.targetId ? ` ${h.targetId}` : ''} -> ${h.outcome}`).join('\n')
+      ? history
+          .map((h) => {
+            const what = h.action === 'TYPE' ? `TYPE "${h.text ?? ''}" into "${h.targetLabel ?? h.targetId}"` : `${h.action}${h.targetLabel ? ` "${h.targetLabel}"` : h.targetId ? ` ${h.targetId}` : ''}`;
+            return `${h.step}. ${what} -> ${h.outcome}${h.pageTitle ? ` (on "${h.pageTitle}")` : ''}`;
+          })
+          .join('\n')
       : 'none yet';
+    const text = observation?.pageText?.length ? observation.pageText.join('\n') : '(no readable text)';
+    const visual = observation?.visualNotes ? `\n\nVision model notes about the screenshot:\n${observation.visualNotes}` : '';
     return [
       { role: 'system', content: SYSTEM_PROMPT },
       {
         role: 'user',
         content:
           `User task: "${task}"\n\nActions taken so far:\n${past}\n\n` +
-          `Current sanitized page elements:\n${this.formatElements(context)}\n\nNext step (JSON only):`,
+          `Page: "${context.pageTitle}"\n\nVisible page text:\n${text}${visual}\n\n` +
+          `Interactive elements:\n${this.formatElements(context)}\n\nNext step (JSON only):`,
       },
     ];
   }
@@ -115,9 +126,9 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
     throw new Error('The model returned neither an action nor done');
   }
 
-  public async nextStep(task: string, context: UnifiedSanitizedContext, history: StepRecord[]): Promise<AgentStep> {
+  public async nextStep(task: string, context: UnifiedSanitizedContext, history: StepRecord[], observation?: Observation): Promise<AgentStep> {
     try {
-      const content = await this.transport(this.modelName, this.buildMessages(task, context, history));
+      const content = await this.transport(this.modelName, this.buildMessages(task, context, history, observation));
       return OllamaReasoningProvider.parseStep(content);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown model error';
