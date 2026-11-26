@@ -8,3 +8,5 @@ Thumbs.db
 *.js.map
 coverage/
 .nyc_output/
+scratch/
+apps/extension/veilbrowse-*.zip
