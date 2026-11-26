@@ -80,3 +80,16 @@ VeilBrowse does NOT protect against:
 ### F. Benchmark Scope
 - 100% precision, recall, F1, and redaction coverage on the 23-case synthetic benchmark.
 - VeilBrowse does not claim 100% PII detection in general.
+
+
+### Personal data in page text and screenshots
+- **Threat:** the agent reads page content to answer questions; profile pages, headers and tables contain names, phones, IDs; screenshots show all of it.
+- **Mitigation:** page text is collected with key/value, table-row, `dt`/`dd` and label/value redaction, then the PII guard. The screenshot sent to the local vision model has every sensitive field and every redacted text block filled black; the model's notes pass the PII guard before the reasoner sees them. Verified in the e2e suite by checking the pixels of the image the vision model received and every prompt the models received.
+- **Residual risk:** free-text names that are not next to a key or greeting.
+
+### Agent typing
+- **Threat:** the model types data into the wrong field or submits a form.
+- **Mitigation:** TYPE only into non-sensitive text fields; mask placeholders cannot be typed; text that looks like personal data, or submitting anything but a search box, needs user confirmation.
+
+### Task moves to another site
+- **Mitigation:** after navigation, the background worker checks the site permission; if the user has not allowed the new site, the side panel asks before anything is read.

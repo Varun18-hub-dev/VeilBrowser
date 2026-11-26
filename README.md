@@ -1,8 +1,11 @@
-# VeilBrowse — A Privacy Firewall for AI Browser Agents
+# VeilBrowse — A Privacy-Preserving AI Browser Agent
 
-VeilBrowse is a Chrome extension that lets an AI agent act on web pages for you **without the model ever seeing your personal data**. You type a task in the side panel ("enable email notifications"). VeilBrowse reads the page locally, removes field values and masks anything sensitive, and sends the model only a sanitized description of the page. Every action the model proposes is checked locally before it runs, and anything that deletes, pays, sends or submits needs your approval.
+VeilBrowse is a Chrome extension that lets an AI agent use websites for you **without the model ever seeing your personal data**. You type a task in the side panel: *"Find the cheapest laptop under ₹60,000"*, *"Open my college portal and check my attendance"*, *"Enable email notifications"*. The agent works in an observe → understand → decide → act loop, across pages, until it is done.
 
-The default model is **Qwen 2.5 3B running locally in Ollama**, so nothing leaves your machine. A rule-based planner is included for offline demos.
+- **Perception:** DOM scan of interactive elements, privacy-safe reading of visible page text, and (optional) a screenshot with private areas blacked out, described by a **local vision model** (default `qwen2.5vl:3b`), which also reads text that only exists as images.
+- **Local privacy firewall:** field values are never read; personal values in page text (`Name: Ajay Kumar` → `Name: [REDACTED]`), emails, phones, cards, ID numbers and greeting names are removed before any model sees the page.
+- **Reasoning:** **Qwen 2.5 3B running locally in Ollama** picks one structured action at a time: `CLICK`, `TYPE`, `SCROLL`, `WAIT`, `NAVIGATE`, or `done` with an answer.
+- **Validation and execution:** Tier 1 schema check, Tier 2 security check, your approval for anything that deletes, pays, sends or submits; the extension is the only thing that touches the page.
 
 **What is enforced, and where it is tested**
 
@@ -10,11 +13,14 @@ The default model is **Qwen 2.5 3B running locally in Ollama**, so nothing leave
 |---|---|---|
 | Field values never leave the page | The scanner reads structure only; `ScannedElement` has no value field | unit tests, privacy invariants |
 | Personal data in visible text is masked before the model sees it | Outbound PII guard (email, phone, card with Luhn check, Aadhaar, PAN, IBAN, SSN, UPI) on labels, title and URL | `agent-loop.test.ts`, e2e prompt log |
-| The model can only CLICK, SCROLL, WAIT or NAVIGATE | Tier 1 closed schema | unit tests, e2e |
-| No clicks on sensitive or unknown fields | Tier 2 policy, fail-closed | unit tests, e2e |
+| Personal values in page text are removed | Key/value, table-row, `dt`/`dd` and label/value redaction, then the PII guard | `perception.test.ts` on the demo pages, e2e prompt log |
+| Screenshots hide what the text hides | Sensitive fields and redacted text are filled black before the vision model sees the image; its notes go through the PII guard | e2e (pixel check on the image the model received) |
+| The model can only CLICK, TYPE, SCROLL, WAIT or NAVIGATE | Tier 1 closed schema | unit tests, e2e |
+| No clicks or typing on sensitive or unknown fields | Tier 2 policy, fail-closed; placeholders like `[EMAIL]` can never be typed back | unit tests, e2e |
+| Typing personal data or submitting a non-search form needs the user | Tier 2 → confirmation | unit tests |
 | Destructive clicks need the user | Local label check (delete, pay, send, submit, ...); the model's own flag is not trusted | unit tests, e2e (decline and approve) |
 | A web page cannot drive the agent | No page bridge; the background accepts task and confirmation messages only from extension pages | e2e (hostile page) |
-| Access only to sites you approve | `optional_host_permissions`, requested per site from the side panel | e2e |
+| Access only to sites you approve | `optional_host_permissions`, requested per site; if a task moves to a new site, the panel asks before reading it | e2e |
 
 ---
 
@@ -25,12 +31,12 @@ The default model is **Qwen 2.5 3B running locally in Ollama**, so nothing leave
                                      │
                     ┌────────────────┴────────────────┐
                     ▼                                 ▼
-             DOM SCANNER                     VISUAL SCANNER
-         (Metadata & Structure)             (Local OCR & CV)
+       DOM SCANNER + PAGE TEXT          REDACTED SCREENSHOT
+   (Structure, labels, visible text)   (Sensitive areas blacked out)
                     │                                 │
                     ▼                                 ▼
-         SENSITIVITY CLASSIFIER              VISUAL DETECTOR
-       (Multi-Signal Heuristics)           (Local Bounding Boxes)
+         SENSITIVITY CLASSIFIER           LOCAL VISION MODEL
+       (Multi-Signal Heuristics)       (qwen2.5vl:3b, optional)
                     │                                 │
                     └────────────────┬────────────────┘
                                      ▼
@@ -64,7 +70,7 @@ The default model is **Qwen 2.5 3B running locally in Ollama**, so nothing leave
                  └─────────┬─────────┘
                            ▼
                             INBOUND AGENT ACTION
-                      (CLICK, SCROLL, WAIT, NAVIGATE)
+                   (CLICK, TYPE, SCROLL, WAIT, NAVIGATE)
                                      │
                                      ▼
                        TIER 1: LOCAL SCHEMA VALIDATOR
@@ -83,8 +89,9 @@ The default model is **Qwen 2.5 3B running locally in Ollama**, so nothing leave
                        (Safe Execution via Native DOM)
                                      │
                                      ▼
-                  RE-SCAN AND REPEAT (up to 8 steps, until the
-                    model replies {"done": true, "summary": ...})
+              RE-SCAN AND REPEAT, ALSO ACROSS PAGE NAVIGATIONS
+           (up to 15 steps, until the model replies {"done": true,
+                         "summary": "<answer>"})
 ```
 
 ### Complete Request Lifecycle
@@ -101,7 +108,7 @@ Outbound PII Guard (mask personal data in visible text)
        ↓
 Reasoning Provider (Ollama qwen2.5:3b via the background worker, or the rule-based planner)
        ↓
-Inbound AgentAction (CLICK / SCROLL / WAIT / NAVIGATE)
+Inbound AgentAction (CLICK / TYPE / SCROLL / WAIT / NAVIGATE)
        ↓
 Tier 1: Local Schema Validation
        ↓
@@ -204,10 +211,18 @@ When AWS DynamoDB session storage is introduced in future phases, the following 
 
 ---
 
-## 5. Real-Browser OCR Status & Limitations
+## 5. Visual Perception and OCR
 
-- **Automated Test Environment (Jest/Node)**: OCR token extraction, regex heuristics, spatial coordinate mapping (`screenshot -> viewport -> page`), and canvas masking (`applyVisualRedaction`) are 100% automated and verified.
-- **Live Chrome Browser Runtime**: Heavy neural/WASM pixel OCR (such as Tesseract.js) is **not bundled** into the MV3 background service worker in this phase to prevent multi-megabyte bundle bloat and external WASM downloads. The visual pipeline in Chrome currently operates on structured token extraction and canvas region masking. Full neural pixel OCR in live Chrome is an explicit, documented limitation intentionally scoped for the future production OCR phase.
+Visual mode is optional (side panel → Settings → *Look at the page visually*).
+
+1. The background worker screenshots the visible tab.
+2. Every sensitive field and every text block whose value was redacted is filled **black** (the screenshot hides exactly what the text hides). Allowed controls get numbered boxes (set-of-marks).
+3. The image goes to a **local** vision model in Ollama (default `qwen2.5vl:3b`). It describes the layout, says which numbered controls matter for the task, and reads text that exists only in images. That is the OCR path in the live extension; no separate OCR engine is bundled.
+4. The model's notes pass the PII guard, box numbers are mapped back to element ids, and the notes are added to the reasoner's context.
+
+Chrome only allows screenshots for extensions with access to all sites (`<all_urls>`) or `activeTab`, so turning visual mode on asks for the all-sites permission. Without visual mode, VeilBrowse asks per site. If the vision model is missing or fails, the agent continues with page structure and text.
+
+The regex-based visual PII detector in `visual-scanner.ts` (OCR tokens → sensitive regions) is tested in Jest but not wired into the live extension.
 
 ---
 
@@ -216,7 +231,7 @@ When AWS DynamoDB session storage is introduced in future phases, the following 
 ### Prerequisites
 - Node.js 18+ and npm 9+
 - Google Chrome 114+ (side panel support)
-- [Ollama](https://ollama.com) with the default model, for real reasoning: `ollama pull qwen2.5:3b`
+- [Ollama](https://ollama.com) with the default models: `ollama pull qwen2.5:3b` (reasoning) and, for visual mode, `ollama pull qwen2.5vl:3b`
 
 ### Build and load the extension
 ```bash
@@ -238,27 +253,45 @@ launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
 # Linux
 OLLAMA_ORIGINS="chrome-extension://*" ollama serve
 ```
-No Ollama? Pick **Rule-based (offline demo)** in the side panel.
+No Ollama? Pick **Rule-based (offline demo)** under Settings. Model names can also be changed there.
 
 ### Try it on the demo page
 ```bash
 npm run start:demo               # http://localhost:3000
 ```
-The demo page has fake personal data (name, email, card, address) and a notification toggle. Ask: *Open notification settings and enable email notifications*.
+All pages contain fake personal data. Try:
+- `index.html`: *Open notification settings and enable email notifications*
+- `shop.html`: *Find the cheapest laptop under ₹60,000* (types a search, follows the results page, answers)
+- `portal.html`: *Check my attendance* (reads a table next to a profile full of personal data)
 
 ### Tests
 ```bash
-npm run test:extension           # 140 unit and security tests
+npm run test:extension           # 157 unit and security tests
 npm run benchmark                # 23-case synthetic detection benchmark
 npm run typecheck:extension
 ```
 
-End-to-end test in a real browser (loads `dist/` into Chrome and drives it from the side panel; uses a stand-in for Ollama that logs every prompt):
+End-to-end test in a real browser. It loads `dist/` into Chrome and drives the real side panel (types the task, clicks Run, answers prompts). A stand-in for Ollama logs every prompt and screenshot the models receive:
 ```bash
-pip install playwright
+pip install playwright pillow
 python apps/extension/e2e/run_e2e.py --chrome "<path to Chrome for Testing or Chromium>"
 ```
-It checks: the demo task really toggles the setting; on an ordinary site the script is injected on demand and the local-LLM path completes; none of the page's personal data appears in any prompt; declined destructive clicks don't run and approved ones do; a hostile page cannot start the agent or read its messages; `chrome://` pages are refused. Branded Chrome 137+ ignores `--load-extension`, so use Chrome for Testing or Chromium.
+15 checks, including:
+- the search task types, follows the results page and answers correctly;
+- the attendance task is answered from redacted text;
+- in the screenshot sent to the vision model, the personal fields and the greeting are black and the attendance table is not;
+- vision notes reach the reasoner with marks mapped and PII removed;
+- the panel asks before reading a new site;
+- **none of the page's personal data appears in any prompt**;
+- destructive clicks need approval;
+- a hostile page cannot drive the agent.
+
+**With the real models:** run Ollama on another port and let the harness proxy and log it. The same privacy checks then run against real Qwen output, and the task checks measure whether the model actually solves them:
+```bash
+OLLAMA_HOST=127.0.0.1:11435 ollama serve          # Windows: set OLLAMA_HOST=127.0.0.1:11435 && ollama serve
+python apps/extension/e2e/run_e2e.py --chrome "<chrome>" --real-ollama http://127.0.0.1:11435
+```
+Branded Chrome 137+ ignores `--load-extension`, so use Chrome for Testing or Chromium.
 
 ### Package for the Chrome Web Store
 ```bash
@@ -270,8 +303,9 @@ The production build is minified, has no source maps, and drops the demo-only co
 
 ## 7. Limitations
 
+- Names are only caught as key/value text ("Name: …"), next to a "Name" label, or after greetings ("Signed in as …"). A name in free text elsewhere (e.g. a chat message) is not detected; a local NER model would be the next step.
 - The detection benchmark is 23 synthetic cases. It shows the rules work as designed, not real-world recall.
-- Destructive-action detection is keyword-based on the target's label. An icon-only "delete" button with no label is not caught, so Tier 2 still blocks unlabeled targets only when they are sensitive.
-- The e2e test uses a scripted stand-in for the model. Task success with the real Qwen 2.5 3B depends on the model and the site.
-- Pixel OCR is not bundled in the live extension (see section 5).
-- Navigation ends a run; give the next instruction after the new page loads.
+- Destructive-action detection is keyword-based on the target's label; an unlabeled icon button is not recognized as destructive.
+- The e2e suite's task checks use scripted model replies by default; run it with `--real-ollama` to measure the real models. A 3B model will not solve every multi-step task.
+- Visual mode needs the all-sites permission (a Chrome restriction on screenshots).
+- Pages inside cross-origin iframes are not scanned.
