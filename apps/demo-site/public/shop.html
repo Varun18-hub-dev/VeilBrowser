@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VeilMart – Electronics</title>
+<style>
+body{font-family:system-ui,sans-serif;margin:0;background:#f8fafc;color:#0f172a}
+header{display:flex;justify-content:space-between;align-items:center;padding:14px 24px;background:#0f172a;color:#fff}
+header .who{font-size:13px;color:#cbd5e1}
+main{max-width:900px;margin:24px auto;padding:0 16px}
+form{display:flex;gap:8px;margin-bottom:20px}form input{flex:1;padding:11px;border:1px solid #cbd5e1;border-radius:10px;font-size:15px}
+form button{padding:11px 18px;border:0;border-radius:10px;background:#2563eb;color:#fff;font-weight:600}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px}
+.card .name{font-weight:650;margin-bottom:6px}.card .price{font-size:18px;color:#15803d;font-weight:700}.card .spec{font-size:12px;color:#64748b;margin:6px 0}
+.account{margin-top:28px;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;font-size:14px}
+.account dl{display:grid;grid-template-columns:140px 1fr;gap:6px;margin:0}.account dt{color:#64748b}
+.empty{color:#64748b}
+</style>
+</head>
+<body>
+<header><strong>VeilMart</strong><span class="who">Signed in as Ajay Kumar · ajay.kumar@example.com</span></header>
+<main>
+  <h1>Electronics</h1>
+  <form action="shop.html" method="get" role="search">
+    <input type="search" name="q" id="q" aria-label="Search products" placeholder="Search products" />
+    <button type="submit">Search</button>
+  </form>
+  <h2 id="results-title" class="empty">Search for a product to see results.</h2>
+  <div id="results" class="grid"></div>
+
+  <section class="account">
+    <h3>Delivery details</h3>
+    <dl>
+      <dt>Name</dt><dd>Ajay Kumar</dd>
+      <dt>Phone</dt><dd>+91 98450 12345</dd>
+      <dt>Address</dt><dd>12/B Lotus Lane, Bandra West, Mumbai 400050</dd>
+    </dl>
+  </section>
+</main>
+<script>
+  // Synthetic catalogue for testing; no real products.
+  var CATALOGUE = [
+    { name: 'Nova Book 14 (i5, 16GB, 512GB SSD)', price: 58990, spec: '14" FHD · 1.4 kg' },
+    { name: 'Orion X15 Gaming (Ryzen 7, RTX 4060)', price: 89990, spec: '15.6" 144Hz · 2.2 kg' },
+    { name: 'Lumen Air 13 (i3, 8GB, 256GB SSD)', price: 41990, spec: '13.3" FHD · 1.2 kg' },
+    { name: 'Vertex Pro 16 (i7, 32GB, 1TB SSD)', price: 124990, spec: '16" 2.5K · 1.9 kg' },
+    { name: 'Pixelbook Go 14 (Ryzen 5, 16GB)', price: 52490, spec: '14" FHD · 1.5 kg' },
+    { name: 'Wireless Mouse M2', price: 899, spec: 'Accessory' }
+  ];
+  var q = new URLSearchParams(location.search).get('q');
+  if (q) {
+    document.getElementById('q').value = q;
+    var words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    var hits = CATALOGUE.filter(function (p) {
+      var hay = (p.name + ' ' + (p.price < 900 ? 'mouse accessory' : 'laptop notebook')).toLowerCase();
+      return words.some(function (w) { return hay.indexOf(w.replace(/s$/, '')) >= 0; });
+    });
+    document.getElementById('results-title').textContent = hits.length + ' results for "' + q + '"';
+    document.getElementById('results-title').className = '';
+    document.getElementById('results').innerHTML = hits.map(function (p) {
+      return '<div class="card"><div class="name">' + p.name + '</div><div class="price">₹' + p.price.toLocaleString('en-IN') +
+        '</div><div class="spec">' + p.spec + '</div><button type="button">Add to cart</button></div>';
+    }).join('');
+  }
+</script>
+</body>
+</html>
