@@ -11,7 +11,7 @@ import type { UnifiedSanitizedContext } from '@veilbrowse/shared-types';
  * values: it only looks at text that was already going to be sent.
  */
 
-export type PiiKind = 'EMAIL' | 'PHONE' | 'CARD' | 'AADHAAR' | 'PAN' | 'IBAN' | 'SSN' | 'UPI';
+export type PiiKind = 'EMAIL' | 'PHONE' | 'CARD' | 'AADHAAR' | 'PAN' | 'IBAN' | 'SSN' | 'UPI' | 'NAME';
 
 export interface PiiFinding {
   kind: PiiKind;
@@ -69,12 +69,30 @@ export const PII_MASK: Record<PiiKind, string> = {
   IBAN: '[IBAN]',
   SSN: '[SSN]',
   UPI: '[UPI]',
+  NAME: '[NAME]',
 };
+
+/**
+ * Names are not pattern-detectable in general. We catch the common UI phrasings where a
+ * page shows the signed-in user's name ("Signed in as Ajay Kumar", "Welcome back, Priya").
+ * Key/value text ("Name: ...") is handled earlier by page-text redaction.
+ */
+const NAME_CONTEXT =
+  /\b((?:hi|hello|hey|welcome(?: back)?|signed in as|logged in as|logged-in as|account of|profile of|good (?:morning|afternoon|evening))[,:]?\s+)((?:Dr\.?|Mr\.?|Mrs\.?|Ms\.?)\s+)?([A-Z][a-zA-Z'-]+(?:\s+[A-Z][a-zA-Z'-]+){0,3})/gi;
 
 /** Replace PII in one string. Returns the scrubbed text and the kinds found. */
 export function scrubText(text: string): { text: string; kinds: PiiKind[] } {
   let out = text;
   const kinds: PiiKind[] = [];
+  out = out.replace(NAME_CONTEXT, (m: string, lead: string, title: string | undefined, name: string) => {
+    // Keep only the leading capitalized words ("Welcome to Amazon" is not a name).
+    const words = name.split(/\s+/);
+    let n = 0;
+    while (n < words.length && /^[A-Z]/.test(words[n])) n++;
+    if (n === 0) return m;
+    kinds.push('NAME');
+    return `${lead}${title ?? ''}${PII_MASK.NAME}${n < words.length ? ' ' + words.slice(n).join(' ') : ''}`;
+  });
   for (const det of DETECTORS) {
     out = out.replace(det.pattern, (m) => {
       if (det.check && !det.check(m)) return m;
@@ -129,4 +147,15 @@ export function countResidualPii(context: UnifiedSanitizedContext): number {
   let n = findPii(context.pageTitle || '').length + findPii(context.pageUrl || '').length;
   for (const e of context.elements) n += findPii(e.accessibleLabel || '').length;
   return n;
+}
+
+/** Scrub a list of text blocks (page content, vision-model notes). */
+export function guardTextBlocks(blocks: string[], field: string): { blocks: string[]; findings: PiiFinding[] } {
+  const findings: PiiFinding[] = [];
+  const out = blocks.map((b, i) => {
+    const r = scrubText(b);
+    for (const kind of r.kinds) findings.push({ kind, field: `${field}:${i}` });
+    return r.text;
+  });
+  return { blocks: out, findings };
 }

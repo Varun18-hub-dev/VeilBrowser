@@ -1,3 +1,4 @@
+import { findPii } from './outbound-guard';
 import {
   SensitiveElementType,
   type AgentAction,
@@ -6,7 +7,7 @@ import {
   type UnifiedSanitizedContext,
 } from '@veilbrowse/shared-types';
 
-const ALLOWED_ACTIONS = new Set<string>(['CLICK', 'SCROLL', 'WAIT', 'NAVIGATE']);
+const ALLOWED_ACTIONS = new Set<string>(['CLICK', 'TYPE', 'SCROLL', 'WAIT', 'NAVIGATE']);
 
 /**
  * Labels that usually mean an irreversible or outward-facing action. A click on such a
@@ -14,6 +15,17 @@ const ALLOWED_ACTIONS = new Set<string>(['CLICK', 'SCROLL', 'WAIT', 'NAVIGATE'])
  * the model's own isDestructive flag is not trusted on its own.
  */
 const DESTRUCTIVE_LABEL = /\b(delete|remove|erase|discard|deactivate|close account|cancel (?:my )?(?:order|subscription|account)|unsubscribe|pay|purchase|buy|checkout|place order|order now|transfer|send|submit|confirm|publish|post|sign out|log ?out|reset)\b/i;
+
+const MAX_TYPE_LENGTH = 500;
+/** Text-entry controls the agent may type into (still subject to the sensitivity check). */
+const TYPEABLE_INPUT_TYPES = new Set(['', 'text', 'search', 'url', 'number']);
+const SEARCH_LABEL = /\b(search|find|query|look ?up|filter)\b/i;
+/** Placeholders produced by the firewall: the model must not try to type redacted data back. */
+const MASK_TOKEN = /\[(?:EMAIL|PHONE|CARD|AADHAAR|PAN|IBAN|SSN|UPI|REDACTED|MASKED)[^\]]*\]/i;
+
+export function isSearchField(el: { role: string | null; accessibleLabel: string | null; tagName: string }): boolean {
+  return el.role === 'searchbox' || SEARCH_LABEL.test(el.accessibleLabel ?? '');
+}
 
 export function isLikelyDestructiveLabel(label: string | null | undefined): boolean {
   return typeof label === 'string' && DESTRUCTIVE_LABEL.test(label);
@@ -61,7 +73,7 @@ export function validateActionSchema(action: unknown): ActionSchemaResult {
     return {
       valid: false,
       errors: [
-        `Action '${actionType}' is forbidden. Only CLICK, SCROLL, WAIT, NAVIGATE allowed. Arbitrary commands or script execution are strictly rejected.`,
+        `Action '${actionType}' is forbidden. Only CLICK, TYPE, SCROLL, WAIT, NAVIGATE allowed. Arbitrary commands or script execution are strictly rejected.`,
       ],
     };
   }
@@ -94,6 +106,30 @@ export function validateActionSchema(action: unknown): ActionSchemaResult {
             ? { x: coords.x as number, y: coords.y as number }
             : undefined,
           isDestructive: Boolean(raw.isDestructive),
+          confirmedByUser: Boolean(raw.confirmedByUser),
+        },
+        errors: [],
+      };
+    }
+
+    case 'TYPE': {
+      if (typeof raw.targetId !== 'string' || raw.targetId.trim().length === 0) {
+        return { valid: false, errors: ['TYPE action requires a targetId string'] };
+      }
+      if (typeof raw.text !== 'string' || raw.text.length === 0 || raw.text.length > MAX_TYPE_LENGTH) {
+        return { valid: false, errors: [`TYPE action requires text of 1 to ${MAX_TYPE_LENGTH} characters`] };
+      }
+      // eslint-disable-next-line no-control-regex
+      if (/[\u0000-\u0008\u000B-\u001F\u007F]/.test(raw.text)) {
+        return { valid: false, errors: ['TYPE text contains control characters'] };
+      }
+      return {
+        valid: true,
+        action: {
+          action: 'TYPE',
+          targetId: raw.targetId,
+          text: raw.text,
+          submit: raw.submit === true,
           confirmedByUser: Boolean(raw.confirmedByUser),
         },
         errors: [],
@@ -333,6 +369,42 @@ export function validateAction(
       };
     }
 
+    case 'TYPE': {
+      const typ = validAction;
+      const target = context.elements.find((e) => e.elementId === typ.targetId);
+      if (!target) {
+        return { valid: false, decision: 'BLOCKED', action: typ, reasons: [`Target element '${typ.targetId}' not found in active page context.`] };
+      }
+      if (target.decision !== 'ALLOWED' || target.category !== SensitiveElementType.NONE) {
+        return {
+          valid: false,
+          decision: 'BLOCKED',
+          action: typ,
+          reasons: [`Target element '${typ.targetId}' is sensitive (${target.category}) or masked. Typing blocked.`],
+        };
+      }
+      const isTextField =
+        target.tagName === 'textarea' ||
+        target.role === 'searchbox' ||
+        target.role === 'combobox' ||
+        (target.tagName === 'input' && (target.role === 'textbox' || target.role === 'searchbox'));
+      if (!isTextField || !target.interactable) {
+        return { valid: false, decision: 'BLOCKED', action: typ, reasons: [`Target element '${typ.targetId}' is not a text field.`] };
+      }
+      if (MASK_TOKEN.test(typ.text)) {
+        return { valid: false, decision: 'BLOCKED', action: typ, reasons: ['The text contains a redaction placeholder; redacted data cannot be typed.'] };
+      }
+      if (!typ.confirmedByUser) {
+        if (findPii(typ.text).length > 0) {
+          return { valid: true, decision: 'REQUIRES_CONFIRMATION', action: typ, reasons: ['The text looks like personal data; the user must approve typing it.'] };
+        }
+        if (typ.submit && !isSearchField(target)) {
+          return { valid: true, decision: 'REQUIRES_CONFIRMATION', action: typ, reasons: ['Submitting a form other than a search box requires user confirmation.'] };
+        }
+      }
+      return { valid: true, decision: 'APPROVED', action: typ, reasons: [`Typing into safe text field '${typ.targetId}'.`] };
+    }
+
     case 'SCROLL': {
       const scroll = validAction;
       const validDirections = ['up', 'down', 'left', 'right'];
@@ -502,6 +574,38 @@ export async function executeAction(
         success: false,
         action: approvedAction,
         message: 'Nothing to click at the requested target',
+        executedAt: Date.now(),
+      };
+    }
+
+    case 'TYPE': {
+      const node = domElementLookup ? domElementLookup(approvedAction.targetId) : null;
+      if (!node || typeof HTMLInputElement === 'undefined' || !(node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement)) {
+        return { success: false, action: approvedAction, message: `Text field ${approvedAction.targetId} is not on the page`, executedAt: Date.now() };
+      }
+      if (node instanceof HTMLInputElement && !TYPEABLE_INPUT_TYPES.has((node.getAttribute('type') || '').toLowerCase())) {
+        return { success: false, action: approvedAction, message: 'Target is not a plain text field', executedAt: Date.now() };
+      }
+      node.focus();
+      // Use the native setter so frameworks (React, Vue) see the change.
+      const proto = node instanceof HTMLInputElement ? HTMLInputElement.prototype : HTMLTextAreaElement.prototype;
+      Object.getOwnPropertyDescriptor(proto, 'value')?.set?.call(node, approvedAction.text);
+      node.dispatchEvent(new Event('input', { bubbles: true }));
+      node.dispatchEvent(new Event('change', { bubbles: true }));
+      if (approvedAction.submit) {
+        const init = { key: 'Enter', code: 'Enter', keyCode: 13, which: 13, bubbles: true, cancelable: true };
+        const notCancelled = node.dispatchEvent(new KeyboardEvent('keydown', init));
+        node.dispatchEvent(new KeyboardEvent('keyup', init));
+        const form = node instanceof HTMLInputElement ? node.form : null;
+        if (notCancelled && form) {
+          if (typeof form.requestSubmit === 'function') form.requestSubmit();
+          else form.submit();
+        }
+      }
+      return {
+        success: true,
+        action: approvedAction,
+        message: `Typed into ${approvedAction.targetId}${approvedAction.submit ? ' and pressed Enter' : ''}`,
         executedAt: Date.now(),
       };
     }

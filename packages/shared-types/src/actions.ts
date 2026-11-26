@@ -2,7 +2,7 @@
  * Allowed Agent Actions whitelist.
  * Absolutely NO arbitrary script execution, eval, or raw code injection.
  */
-export type ActionType = 'CLICK' | 'SCROLL' | 'WAIT' | 'NAVIGATE';
+export type ActionType = 'CLICK' | 'TYPE' | 'SCROLL' | 'WAIT' | 'NAVIGATE';
 
 /**
  * Click action definition.
@@ -16,6 +16,19 @@ export interface ClickAction {
     y: number;
   };
   isDestructive?: boolean;
+  confirmedByUser?: boolean;
+}
+
+/**
+ * Type text into a non-sensitive text field (e.g. a search box).
+ * Never allowed on password, payment, identity, contact or unknown fields.
+ * `submit` presses Enter afterwards; outside search boxes this needs user confirmation.
+ */
+export interface TypeAction {
+  action: 'TYPE';
+  targetId: string;
+  text: string; // 1..500 chars
+  submit?: boolean;
   confirmedByUser?: boolean;
 }
 
@@ -47,7 +60,7 @@ export interface NavigateAction {
 /**
  * Union of all allowed agent actions.
  */
-export type AgentAction = ClickAction | ScrollAction | WaitAction | NavigateAction;
+export type AgentAction = ClickAction | TypeAction | ScrollAction | WaitAction | NavigateAction;
 
 /**
  * Validation outcome for an agent action.
