@@ -7,6 +7,17 @@ import {
 } from '@veilbrowse/shared-types';
 
 const ALLOWED_ACTIONS = new Set<string>(['CLICK', 'SCROLL', 'WAIT', 'NAVIGATE']);
+
+/**
+ * Labels that usually mean an irreversible or outward-facing action. A click on such a
+ * target needs the user's confirmation even if the model did not mark it destructive:
+ * the model's own isDestructive flag is not trusted on its own.
+ */
+const DESTRUCTIVE_LABEL = /\b(delete|remove|erase|discard|deactivate|close account|cancel (?:my )?(?:order|subscription|account)|unsubscribe|pay|purchase|buy|checkout|place order|order now|transfer|send|submit|confirm|publish|post|sign out|log ?out|reset)\b/i;
+
+export function isLikelyDestructiveLabel(label: string | null | undefined): boolean {
+  return typeof label === 'string' && DESTRUCTIVE_LABEL.test(label);
+}
 const MAX_SCROLL_DISTANCE = 2000;
 const MIN_WAIT_MS = 100;
 const MAX_WAIT_MS = 10000;
@@ -227,8 +238,8 @@ export function validateAction(
           };
         }
 
-        // Destructive action confirmation
-        if (click.isDestructive && !click.confirmedByUser) {
+        // Destructive action confirmation (model flag OR local label check)
+        if ((click.isDestructive || isLikelyDestructiveLabel(target.accessibleLabel)) && !click.confirmedByUser) {
           return {
             valid: true,
             decision: 'REQUIRES_CONFIRMATION',
@@ -465,12 +476,32 @@ export async function executeAction(
         const domNode = domElementLookup(approvedAction.targetId);
         if (domNode) {
           domNode.click();
+          return {
+            success: true,
+            action: approvedAction,
+            message: `Clicked ${approvedAction.targetId}`,
+            executedAt: Date.now(),
+          };
+        }
+        return {
+          success: false,
+          action: approvedAction,
+          message: `Element ${approvedAction.targetId} is no longer on the page`,
+          executedAt: Date.now(),
+        };
+      }
+      if (approvedAction.targetCoordinates && typeof document !== 'undefined') {
+        const { x, y } = approvedAction.targetCoordinates;
+        const node = document.elementFromPoint(x, y) as HTMLElement | null;
+        if (node) {
+          node.click();
+          return { success: true, action: approvedAction, message: `Clicked at (${x}, ${y})`, executedAt: Date.now() };
         }
       }
       return {
-        success: true,
+        success: false,
         action: approvedAction,
-        message: `Clicked ${approvedAction.targetId || 'coordinates'}`,
+        message: 'Nothing to click at the requested target',
         executedAt: Date.now(),
       };
     }
@@ -503,10 +534,14 @@ export async function executeAction(
     }
 
     case 'NAVIGATE': {
+      // Navigation unloads this content script, so it is the last step of a run.
+      if (typeof window !== 'undefined' && typeof window.location?.assign === 'function' && !navigator.userAgent.includes('jsdom')) {
+        window.location.assign(approvedAction.url);
+      }
       return {
         success: true,
         action: approvedAction,
-        message: `Navigated to ${approvedAction.url}`,
+        message: `Navigating to ${approvedAction.url}`,
         executedAt: Date.now(),
       };
     }

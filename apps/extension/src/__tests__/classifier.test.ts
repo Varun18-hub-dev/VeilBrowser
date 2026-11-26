@@ -130,9 +130,9 @@ describe('Classifier Unit Tests', () => {
       };
       // Note: name contains "email" which triggers email heuristic keyword match
       const result = classifyElement(attrs);
-      // Because name contains "email", the rule-based heuristic signals email sensitivity
-      expect(result.isSensitive).toBe(true);
-      expect(result.type).toBe(SensitiveElementType.EMAIL);
+      // A checkbox holds an on/off preference, not an email address, even if its name says "email"
+      expect(result.isSensitive).toBe(false);
+      expect(result.type).toBe(SensitiveElementType.NONE);
     });
   });
 
@@ -158,5 +158,21 @@ describe('Classifier Unit Tests', () => {
       expect(isInteractable('div', undefined, 'button')).toBe(true);
       expect(isInteractable('div', undefined, null)).toBe(false);
     });
+  });
+});
+
+describe('non-text inputs are not personal-data fields', () => {
+  it('a checkbox named email_notifications is a preference toggle, not an EMAIL field', () => {
+    const r = classifyElement({ tagName: 'input', type: 'checkbox', name: 'email_notifications', id: 'email-notif-toggle', labelText: 'Enable email notifications for security alerts' });
+    expect(r.type).toBe(SensitiveElementType.NONE);
+  });
+  it('a radio choosing "phone" contact is not a PHONE field', () => {
+    expect(classifyElement({ tagName: 'input', type: 'radio', name: 'contact_phone', labelText: 'Contact me by phone' }).type).toBe(SensitiveElementType.NONE);
+  });
+  it('a text input with the same name is still EMAIL', () => {
+    expect(classifyElement({ tagName: 'input', type: 'email', name: 'email' }).type).toBe(SensitiveElementType.EMAIL);
+  });
+  it('hidden inputs are not exempted', () => {
+    expect(classifyElement({ tagName: 'input', type: 'hidden', name: 'card_number' }).type).not.toBe(SensitiveElementType.NONE);
   });
 });

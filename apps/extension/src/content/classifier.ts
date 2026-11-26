@@ -272,8 +272,18 @@ function evaluateContextualSignals(contextHeading: string | undefined): Signal[]
 /**
  * Check if the element has explicit indicators of being a safe, non-sensitive control.
  */
+/**
+ * Input types that cannot hold typed personal data: their value is a toggle state or a
+ * fixed, page-defined value. A checkbox named "email_notifications" is a preference,
+ * not an email address. (type="hidden" is NOT included: hidden inputs often carry tokens.)
+ */
+const NON_TEXT_INPUT_TYPES = new Set(['checkbox', 'radio', 'button', 'submit', 'reset', 'range', 'color', 'image']);
+
 function isExplicitlySafe(attrs: ElementAttributes): boolean {
   if (attrs.type === 'search') return true;
+  if (attrs.tagName.toLowerCase() === 'input' && attrs.type && NON_TEXT_INPUT_TYPES.has(attrs.type.toLowerCase())) {
+    return true;
+  }
   const combined = [attrs.name, attrs.id, attrs.ariaLabel, attrs.labelText]
     .filter(Boolean)
     .join(' ')
