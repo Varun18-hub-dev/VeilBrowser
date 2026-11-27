@@ -298,7 +298,13 @@ chrome.runtime.onMessage.addListener(
     // Only this extension's own pages and content scripts.
     if (sender.id !== chrome.runtime.id) return undefined;
     // Extension pages (side panel, popup) vs content scripts running inside web pages.
-    const fromExtensionPage = typeof sender.url === 'string' && sender.url.startsWith(chrome.runtime.getURL(''));
+    // Content scripts always carry sender.tab; the real side panel may report no URL, so also accept
+    // senders without a tab (a web page can never send runtime messages to this extension).
+    const extOrigin = chrome.runtime.getURL('');
+    const fromExtensionPage =
+      (typeof sender.url === 'string' && sender.url.startsWith(extOrigin)) ||
+      (typeof sender.origin === 'string' && extOrigin.startsWith(sender.origin)) ||
+      !sender.tab;
     const senderTab = sender.tab?.id;
     const m = message as unknown as Record<string, unknown>;
 

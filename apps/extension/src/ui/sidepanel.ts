@@ -170,7 +170,8 @@ async function startTask(tabId: number, task: string): Promise<void> {
       targetTabId: tabId,
       payload: { task, provider: providerSelect.value === 'mock' ? 'mock' : 'qwen', visual: visualToggle.checked },
     })) as { ok?: boolean; error?: string } | undefined;
-    if (!response?.ok) throw new Error(response?.error || 'VeilBrowse could not start on this page.');
+    if (!response) throw new Error('No reply from the VeilBrowse background worker. Reload the extension on chrome://extensions and refresh the page.');
+    if (!response.ok) throw new Error(response.error || 'VeilBrowse could not start on this page.');
   } catch (error) {
     showError(error instanceof Error ? error.message : 'Refresh the page and try again.');
     runningTabId = null;
