@@ -45,13 +45,11 @@ json.dump(m, open(f"{EXT_ALL}/manifest.json", "w"))
 
 import socket
 _probe = socket.socket()
-try:
-    _probe.bind(("127.0.0.1", 11434))
-except OSError:
+_in_use = _probe.connect_ex(("127.0.0.1", 11434)) == 0  # something is listening there
+_probe.close()
+if _in_use:
     sys.exit("Port 11434 is in use, probably by the Ollama app. Quit Ollama (system tray -> Quit), "
              "then run the real model on another port: OLLAMA_HOST=127.0.0.1:11435 ollama serve")
-finally:
-    _probe.close()
 
 procs = [
     subprocess.Popen([sys.executable, "-m", "http.server", port, "--bind", host, "-d", DEMO], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

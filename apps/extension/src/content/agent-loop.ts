@@ -34,6 +34,8 @@ export type AgentStep =
 export interface Observation {
   pageText: string[];
   visualNotes?: string;
+  /** Correction from the loop, e.g. "you just did this and it worked". */
+  feedback?: string;
 }
 
 export interface StepProvider {
@@ -75,6 +77,14 @@ export interface LoopDeps {
   /** Total step budget for the whole task, across pages. */
   maxSteps?: number;
   settleMs?: number;
+}
+
+function isSameAction(raw: unknown, prev: StepRecord): boolean {
+  if (!raw || typeof raw !== 'object') return false;
+  const a = raw as Record<string, unknown>;
+  if (String(a.action ?? '').toUpperCase() !== prev.action) return false;
+  if (prev.action === 'SCROLL' || prev.action === 'WAIT') return false; // repeating these can be legitimate
+  return (a.targetId ?? undefined) === prev.targetId && (a.text ?? undefined) === prev.text;
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -160,6 +170,21 @@ export async function runAgentLoop(deps: LoopDeps): Promise<LoopResult> {
     let next: AgentStep;
     try {
       next = await deps.provider.nextStep(deps.task, context, steps, observation);
+      // Repeat guard: an action identical to the last successful one on this page is not run.
+      // The model is told once that it already worked and asked again.
+      const prev = [...steps].reverse().find((s) => s.outcome === 'EXECUTED');
+      if (!next.done && prev && prev.pageTitle === context.pageTitle && isSameAction(next.action, prev)) {
+        deps.emit({ type: 'AGENT_STATUS_UPDATE', status: 'REASONING', step: i, currentStep: 'Checking whether the task is already done' });
+        next = await deps.provider.nextStep(deps.task, context, steps, {
+          ...observation,
+          feedback:
+            `You proposed ${prev.action}${prev.targetLabel ? ` "${prev.targetLabel}"` : ''} again, but it already succeeded in step ${prev.step}. ` +
+            'Do not repeat it. If the task is complete (or the answer is in the page text), set done=true and give the answer; otherwise choose a different action.',
+        });
+        if (!next.done && isSameAction(next.action, prev)) {
+          return finish('STOPPED', 'The agent kept proposing an action that had already succeeded, so it stopped.');
+        }
+      }
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Unknown provider error';
       return finish('ERROR', `The reasoning model failed: ${msg}`);

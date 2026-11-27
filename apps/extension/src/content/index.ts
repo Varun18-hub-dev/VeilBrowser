@@ -93,8 +93,8 @@ function bootstrap(): void {
   }
 
   /** Model calls go through the background worker (the content script has the page's origin). */
-  const backgroundTransport: ChatTransport = async (model, messages) => {
-    const response = (await chrome.runtime.sendMessage({ type: 'LLM_CHAT_REQUEST', payload: { model, messages } })) as LlmChatResponse | undefined;
+  const backgroundTransport: ChatTransport = async (model, messages, format) => {
+    const response = (await chrome.runtime.sendMessage({ type: 'LLM_CHAT_REQUEST', payload: { model, messages, format } })) as LlmChatResponse | undefined;
     if (!response?.ok || !response.content) throw new Error(response?.error || 'No response from the local model');
     return response.content;
   };

@@ -303,7 +303,19 @@ The production build is minified, has no source maps, and drops the demo-only co
 
 ---
 
-## 7. Limitations
+## 7. Evaluation with the real models
+
+Runs of the e2e suite with `--real-ollama` (Qwen 2.5 3B + Qwen 2.5-VL 3B, Ollama 0.40, CPU-only laptop, 8 GB RAM). Every prompt and screenshot the models received is logged and checked.
+
+| Run | Change before the run | Task checks passed | Privacy checks | What failed |
+|---|---|---|---|---|
+| 1 | first real run | 0 / 6 | 4 / 4 | 90 s timeout too short on CPU; timed-out calls kept Ollama busy and every later call timed out; prompts overflowed the 4k context |
+| 2 | toggle state visible, prompt ~700 tokens, 240 s timeout | 2 / 6 (confirm-decline, confirm-approve) | 4 / 4 | model never set "done": clicked the toggle 3 times, re-clicked Search on the results page, re-clicked the Attendance link instead of answering; vision model > 5 min per screenshot |
+| 3 | JSON-schema replies with thought + done first, 3 few-shot examples, repeat guard that feeds back "already succeeded", 896 px screenshots | *pending* | | |
+
+Privacy checks = no personal data in any prompt, outbound PII 0, hostile page cannot drive the agent, `chrome://` refused. They held in every run.
+
+## 8. Limitations
 
 - Names are only caught as key/value text ("Name: …"), next to a "Name" label, or after greetings ("Signed in as …"). A name in free text elsewhere (e.g. a chat message) is not detected; a local NER model would be the next step.
 - The detection benchmark is 23 synthetic cases. It shows the rules work as designed, not real-world recall.

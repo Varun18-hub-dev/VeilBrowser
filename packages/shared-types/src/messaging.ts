@@ -104,6 +104,8 @@ export interface LlmChatRequestMessage extends VeilBrowseMessage {
   payload: {
     model: string;
     messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+    /** Optional JSON schema for Ollama structured outputs (defaults to plain JSON mode). */
+    format?: Record<string, unknown>;
   };
 }
 

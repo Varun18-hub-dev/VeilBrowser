@@ -210,12 +210,13 @@ async function ollamaChat(body: Record<string, unknown>, timeoutMs: number): Pro
 }
 
 async function proxyLlmChat(message: LlmChatRequestMessage): Promise<LlmChatResponse> {
-  const { model, messages } = message.payload;
+  const { model, messages, format } = message.payload;
   if (typeof model !== 'string' || !MODEL_NAME.test(model) || !Array.isArray(messages)) {
     return { ok: false, error: 'Invalid model request' };
   }
+  const schema = format && typeof format === 'object' && JSON.stringify(format).length < 4000 ? format : 'json';
   // Short JSON answers; keep the model loaded between steps. CPU-only machines can take minutes per call.
-  return ollamaChat({ model, messages, format: 'json', keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, 240_000);
+  return ollamaChat({ model, messages, format: schema, keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, 240_000);
 }
 
 // ---------------------------------------------------------------- visual perception
@@ -254,7 +255,7 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
     return { ok: false, error: `Screenshot failed: ${err instanceof Error ? err.message : String(err)}` };
   }
   const bitmap = await createImageBitmap(await (await fetch(dataUrl)).blob());
-  const outW = Math.min(bitmap.width, 1280);
+  const outW = Math.min(bitmap.width, 896); // fewer image tokens: much faster on CPU
   const k = outW / bitmap.width;
   const canvas = new OffscreenCanvas(outW, Math.round(bitmap.height * k));
   const ctx = canvas.getContext('2d');

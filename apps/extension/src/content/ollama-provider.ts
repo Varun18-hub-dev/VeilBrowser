@@ -8,7 +8,28 @@ import type { AgentStep, Observation, StepProvider, StepRecord } from './agent-l
 export type ChatMessage = { role: 'system' | 'user' | 'assistant'; content: string };
 
 /** Sends chat messages to a model and returns the reply text. */
-export type ChatTransport = (model: string, messages: ChatMessage[]) => Promise<string>;
+export type ChatTransport = (model: string, messages: ChatMessage[], format?: Record<string, unknown>) => Promise<string>;
+
+/**
+ * Structured-output schema: the model must state a short thought and whether the task is
+ * done BEFORE choosing an action. Small models decide "done" much more reliably this way.
+ */
+export const STEP_SCHEMA: Record<string, unknown> = {
+  type: 'object',
+  properties: {
+    thought: { type: 'string' },
+    done: { type: 'boolean' },
+    answer: { type: 'string' },
+    action: { type: 'string', enum: ['CLICK', 'TYPE', 'SCROLL', 'WAIT', 'NAVIGATE', 'NONE'] },
+    targetId: { type: 'string' },
+    text: { type: 'string' },
+    submit: { type: 'boolean' },
+    direction: { type: 'string', enum: ['up', 'down'] },
+    url: { type: 'string' },
+    durationMs: { type: 'integer' },
+  },
+  required: ['thought', 'done'],
+};
 
 export interface OllamaProviderOptions {
   endpoint?: string;
@@ -20,11 +41,11 @@ export interface OllamaProviderOptions {
 
 /** Direct HTTP transport (used outside the browser, e.g. in scripts and tests). */
 export function fetchTransport(endpoint: string): ChatTransport {
-  return async (model, messages) => {
+  return async (model, messages, format) => {
     const response = await fetch(`${endpoint}/api/chat`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ model, messages, stream: false, format: 'json', options: { temperature: 0.1 } }),
+      body: JSON.stringify({ model, messages, stream: false, format: format ?? 'json', options: { temperature: 0.1 } }),
     });
     if (!response.ok) throw new Error(`Ollama HTTP error ${response.status}: ${response.statusText}`);
     const data = await response.json();
@@ -34,22 +55,26 @@ export function fetchTransport(endpoint: string): ChatTransport {
   };
 }
 
-const SYSTEM_PROMPT =
-  'You are a browser agent working through the VeilBrowse privacy firewall.\n' +
-  'You see a sanitized page: interactive elements (with ids), visible page text, and sometimes notes from a vision model.\n' +
-  'Personal data has been replaced with placeholders like [REDACTED], [EMAIL], [NAME]. Never try to recover or type them.\n' +
-  'Each turn, choose ONE next action toward the user task, or finish.\n' +
-  'Reply with ONE JSON object and nothing else, in one of these forms:\n' +
-  '  {"action": "CLICK", "targetId": "<id>"}\n' +
-  '  {"action": "TYPE", "targetId": "<id of a text field>", "text": "<text>", "submit": true}\n' +
-  '  {"action": "SCROLL", "direction": "down"}\n' +
-  '  {"action": "WAIT", "durationMs": 1000}\n' +
-  '  {"action": "NAVIGATE", "url": "https://..."}\n' +
-  '  {"done": true, "summary": "<what was done, or the answer the user asked for>"}\n' +
-  'Rules: only use ids from the element list; ' +
-  'if the task asks a question and the answer is in the page text, answer it in the summary right away; ' +
-  'check the state column (checked=true means a setting is already on) and the actions taken so far: ' +
-  'if the task is already achieved, finish. Never repeat an action that already succeeded.';
+const SYSTEM_PROMPT = `You control a web browser for the user through a privacy firewall.
+Personal data is hidden as [REDACTED], [EMAIL], [NAME], etc. Never try to use it.
+Each turn reply with ONE JSON object:
+{"thought": "<one short sentence: what is already done and what is next>", "done": true or false,
+ "answer": "<when done: the answer, or what was done>",
+ "action": "CLICK|TYPE|SCROLL|WAIT|NAVIGATE", "targetId": "<id>", "text": "<for TYPE>", "submit": true, "url": "<for NAVIGATE>"}
+Rules:
+1. If the task asks for information and it is in the page text, set done=true and give it in "answer". Do not click.
+2. If the task asks for a change and it is already true (e.g. checked=true) or the last action did it, set done=true.
+3. Never repeat an action that already succeeded.
+4. To search: TYPE into the search box with "submit": true, then read the results in the page text.
+5. If the task gives a URL, NAVIGATE to it.
+6. Only use ids from the element list.
+Examples:
+Task: "turn on dark mode". Done so far: CLICK "Dark mode" -> EXECUTED. Element: e5 | checkbox | "Dark mode" checked=true
+{"thought": "Dark mode is now checked, so the task is complete.", "done": true, "answer": "Dark mode is on."}
+Task: "what is my order status". Page text: "Order #123 | Shipped"
+{"thought": "The status is in the page text.", "done": true, "answer": "Your order has shipped."}
+Task: "search for headphones". Element: e2 | searchbox | "Search"
+{"thought": "I need to search first.", "done": false, "action": "TYPE", "targetId": "e2", "text": "headphones", "submit": true}`;
 
 /**
  * OllamaReasoningProvider — local LLM (default Qwen 2.5 3B) through Ollama.
@@ -102,6 +127,7 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
     let text = observation?.pageText?.length ? observation.pageText.join('\n') : '(no readable text)';
     if (text.length > 2500) text = text.slice(0, 2500) + '\n…';
     const visual = observation?.visualNotes ? `\n\nVision model notes about the screenshot:\n${observation.visualNotes}` : '';
+    const feedback = observation?.feedback ? `\n\nIMPORTANT: ${observation.feedback}` : '';
     return [
       { role: 'system', content: SYSTEM_PROMPT },
       {
@@ -109,7 +135,7 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
         content:
           `User task: "${task}"\n\nActions taken so far:\n${past}\n\n` +
           `Page: "${context.pageTitle}"\n\nVisible page text:\n${text}${visual}\n\n` +
-          `Interactive elements (id | role | label | state):\n${this.formatElements(context)}\n\nNext step (JSON only):`,
+          `Interactive elements (id | role | label | state):\n${this.formatElements(context)}${feedback}\n\nNext step (JSON only):`,
       },
     ];
   }
@@ -125,16 +151,25 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
     if (Array.isArray(parsed)) parsed = parsed[0];
     if (parsed && typeof parsed === 'object') {
       const obj = parsed as Record<string, unknown>;
-      if (obj.done === true) return { done: true, summary: typeof obj.summary === 'string' ? obj.summary : '' };
+      const str = (v: unknown) => (typeof v === 'string' ? v : '');
+      if (obj.done === true) return { done: true, summary: str(obj.answer) || str(obj.summary) || str(obj.thought) };
       if (Array.isArray(obj.actions) && obj.actions.length) return { done: false, action: obj.actions[0] };
-      if ('action' in obj) return { done: false, action: obj };
+      if (typeof obj.action === 'string' && obj.action !== 'NONE') {
+        // Flat structured-output form: pick only the action fields (thought/answer are not part of the action).
+        const action: Record<string, unknown> = { action: obj.action };
+        for (const k of ['targetId', 'text', 'submit', 'direction', 'distance', 'url', 'durationMs']) {
+          if (obj[k] !== undefined && obj[k] !== '') action[k] = obj[k];
+        }
+        return { done: false, action };
+      }
+      if (obj.action && typeof obj.action === 'object') return { done: false, action: obj.action };
     }
     throw new Error('The model returned neither an action nor done');
   }
 
   public async nextStep(task: string, context: UnifiedSanitizedContext, history: StepRecord[], observation?: Observation): Promise<AgentStep> {
     try {
-      const content = await this.transport(this.modelName, this.buildMessages(task, context, history, observation));
+      const content = await this.transport(this.modelName, this.buildMessages(task, context, history, observation), STEP_SCHEMA);
       return OllamaReasoningProvider.parseStep(content);
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Unknown model error';

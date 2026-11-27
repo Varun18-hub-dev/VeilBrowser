@@ -199,3 +199,41 @@ describe('toggle state', () => {
     expect(lines).not.toContain('medical');
   });
 });
+
+describe('repeat guard (behaviour seen with real Qwen 2.5 3B)', () => {
+  const page = [el('toggle', 'Email notifications')];
+
+  it('does not re-run an action that already succeeded; asks the model again with feedback', async () => {
+    const clicks: string[] = [];
+    const feedbacks: (string | undefined)[] = [];
+    const provider: StepProvider = {
+      providerId: 'repeats-once',
+      nextStep: async (_t, _c, _h, obs) => {
+        feedbacks.push(obs?.feedback);
+        if (obs?.feedback) return { done: true, summary: 'Email notifications are on.' };
+        return { done: false, action: { action: 'CLICK', targetId: 'toggle' } }; // keeps proposing the same click
+      },
+    };
+    const r = await runAgentLoop(deps(provider, page, { clicks }));
+    expect(clicks).toEqual(['toggle']); // clicked once, not toggled back off
+    expect(r.status).toBe('COMPLETED');
+    expect(r.summary).toBe('Email notifications are on.');
+    expect(feedbacks[2]).toMatch(/already succeeded/);
+  });
+
+  it('stops if the model insists on repeating', async () => {
+    const clicks: string[] = [];
+    const provider: StepProvider = { providerId: 'stubborn', nextStep: async () => ({ done: false, action: { action: 'CLICK', targetId: 'toggle' } }) };
+    const r = await runAgentLoop(deps(provider, page, { clicks }));
+    expect(clicks).toEqual(['toggle']);
+    expect(r.status).toBe('STOPPED');
+  });
+
+  it('parses the structured-output reply format', () => {
+    expect(OllamaReasoningProvider.parseStep('{"thought":"search first","done":false,"action":"TYPE","targetId":"e2","text":"laptop","submit":true,"answer":""}')).toEqual({
+      done: false,
+      action: { action: 'TYPE', targetId: 'e2', text: 'laptop', submit: true },
+    });
+    expect(OllamaReasoningProvider.parseStep('{"thought":"in the text","done":true,"answer":"82%"}')).toEqual({ done: true, summary: '82%' });
+  });
+});
