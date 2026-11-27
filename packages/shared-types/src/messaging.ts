@@ -74,11 +74,14 @@ export interface RunAgentTaskFromPanelMessage extends VeilBrowseMessage {
 export interface VeilBrowseSettings {
   textModel: string;
   visionModel: string;
+  /** Per-call time limit for the local model, in seconds (CPU-only machines need minutes). */
+  timeoutSec: number;
 }
 
 export const DEFAULT_SETTINGS: VeilBrowseSettings = {
   textModel: 'qwen2.5:3b',
   visionModel: 'qwen2.5vl:3b',
+  timeoutSec: 600,
 };
 
 /** Background -> content script: start (or resume, with history) the agent loop. */

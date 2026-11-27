@@ -19,6 +19,7 @@ const providerSelect = $<HTMLSelectElement>('provider');
 const visualToggle = $<HTMLInputElement>('visual');
 const textModel = $<HTMLInputElement>('text-model');
 const visionModel = $<HTMLInputElement>('vision-model');
+const timeoutInput = $<HTMLInputElement>('timeout');
 
 type Stage = 'understand' | 'inspect' | 'protect' | 'execute';
 const STAGES: Stage[] = ['understand', 'inspect', 'protect', 'execute'];
@@ -36,17 +37,22 @@ void chrome.storage.local.get([SETTINGS_KEY, PREFS_KEY]).then((s) => {
   const settings = { ...DEFAULT_SETTINGS, ...(s[SETTINGS_KEY] ?? {}) };
   textModel.value = settings.textModel;
   visionModel.value = settings.visionModel;
+  timeoutInput.value = String(settings.timeoutSec);
   const prefs = s[PREFS_KEY] ?? {};
   if (prefs.provider === 'mock' || prefs.provider === 'qwen') providerSelect.value = prefs.provider;
   visualToggle.checked = prefs.visual === true;
 });
 function saveSettings(): void {
   void chrome.storage.local.set({
-    [SETTINGS_KEY]: { textModel: textModel.value.trim() || DEFAULT_SETTINGS.textModel, visionModel: visionModel.value.trim() || DEFAULT_SETTINGS.visionModel },
+    [SETTINGS_KEY]: {
+      textModel: textModel.value.trim() || DEFAULT_SETTINGS.textModel,
+      visionModel: visionModel.value.trim() || DEFAULT_SETTINGS.visionModel,
+      timeoutSec: Math.min(3600, Math.max(30, Number(timeoutInput.value) || DEFAULT_SETTINGS.timeoutSec)),
+    },
     [PREFS_KEY]: { provider: providerSelect.value, visual: visualToggle.checked },
   });
 }
-for (const el of [textModel, visionModel, providerSelect]) el.addEventListener('change', saveSettings);
+for (const el of [textModel, visionModel, timeoutInput, providerSelect]) el.addEventListener('change', saveSettings);
 
 // Screenshots need Chrome's "all sites" permission; ask only when the user turns visual mode on.
 visualToggle.addEventListener('change', () => {

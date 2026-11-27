@@ -70,6 +70,7 @@ async function getSettings(): Promise<VeilBrowseSettings> {
     return {
       textModel: s?.textModel && MODEL_NAME.test(s.textModel) ? s.textModel : DEFAULT_SETTINGS.textModel,
       visionModel: s?.visionModel && MODEL_NAME.test(s.visionModel) ? s.visionModel : DEFAULT_SETTINGS.visionModel,
+      timeoutSec: typeof s?.timeoutSec === 'number' && s.timeoutSec >= 30 && s.timeoutSec <= 3600 ? s.timeoutSec : DEFAULT_SETTINGS.timeoutSec,
     };
   } catch {
     return DEFAULT_SETTINGS;
@@ -203,7 +204,7 @@ async function ollamaChat(body: Record<string, unknown>, timeoutMs: number): Pro
     return content ? { ok: true, content } : { ok: false, error: 'Empty response from the model' };
   } catch (err) {
     const aborted = err instanceof Error && err.name === 'AbortError';
-    return { ok: false, error: aborted ? 'The local model timed out' : 'Could not reach Ollama at 127.0.0.1:11434. Is it running?' };
+    return { ok: false, error: aborted ? 'The local model timed out. On a slow computer, raise "Model time limit" in Settings or close other apps to free memory.' : 'Could not reach Ollama at 127.0.0.1:11434. Is it running?' };
   } finally {
     clearTimeout(timer);
   }
@@ -216,7 +217,8 @@ async function proxyLlmChat(message: LlmChatRequestMessage): Promise<LlmChatResp
   }
   const schema = format && typeof format === 'object' && JSON.stringify(format).length < 4000 ? format : 'json';
   // Short JSON answers; keep the model loaded between steps. CPU-only machines can take minutes per call.
-  return ollamaChat({ model, messages, format: schema, keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, 240_000);
+  const { timeoutSec } = await getSettings();
+  return ollamaChat({ model, messages, format: schema, keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, timeoutSec * 1000);
 }
 
 // ---------------------------------------------------------------- visual perception
@@ -287,7 +289,7 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
   const image = toBase64(await blob.arrayBuffer());
   return ollamaChat(
     { model: req.model, messages: [{ role: 'user', content: VISION_PROMPT(req.task), images: [image] }], keep_alive: '30m', options: { temperature: 0.1, num_predict: 300 } },
-    600_000
+    (await getSettings()).timeoutSec * 1000
   );
 }
 

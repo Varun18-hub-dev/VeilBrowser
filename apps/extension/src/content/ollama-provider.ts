@@ -97,7 +97,7 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
   }
 
   /** Compact, privacy-safe element list: one line per element, sized for a 4k context. */
-  public formatElements(context: UnifiedSanitizedContext, max = 45): string {
+  public formatElements(context: UnifiedSanitizedContext, max = 35): string {
     const lines: string[] = [];
     let masked = 0;
     for (const e of context.elements) {
@@ -126,7 +126,7 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
           .join('\n')
       : 'none yet';
     let text = observation?.pageText?.length ? observation.pageText.join('\n') : '(no readable text)';
-    if (text.length > 2500) text = text.slice(0, 2500) + '\n…';
+    if (text.length > 1800) text = text.slice(0, 1800) + '\n…';
     const visual = observation?.visualNotes ? `\n\nVision model notes about the screenshot:\n${observation.visualNotes}` : '';
     const feedback = observation?.feedback ? `\n\nIMPORTANT: ${observation.feedback}` : '';
     return [
