@@ -4,8 +4,9 @@ VeilBrowse does not collect, store on a server, sell, or share any personal data
 
 **What the extension reads.** When you run a task, VeilBrowse reads the structure of the current page (element types, roles, labels, positions) and its visible text. It never reads the values typed into form fields. In visual mode it also takes a screenshot of the visible tab.
 
-**What it sends, and where.** It sends a sanitized description of the page (opaque element ids, roles, masked labels) and your task text to the reasoning model you choose:
-- **Local LLM (default):** Ollama on your own computer at `127.0.0.1:11434`. Nothing leaves your machine.
+**What it sends, and where.** It sends a sanitized description of the page (opaque element ids, roles, masked labels, redacted page text) and your task text to the engine you choose in Settings:
+- **Local (default):** Ollama on your own computer at `127.0.0.1:11434`. Nothing leaves your machine.
+- **Cloud (optional):** the VeilBrowse server, a Cloudflare Worker that runs open models on Cloudflare Workers AI. It receives only the sanitized context, plus a random install id used for rate limiting. It does not log or store prompts or answers; the only stored data is a daily request counter per install id, deleted after 48 hours. Screenshots are sent to the cloud only if you also turn on **Allow cloud vision** and confirm; sensitive areas are blacked out first.
 - **Rule-based:** runs inside the extension. Nothing is sent anywhere.
 
 Before anything is sent, personal values in the page text ("Name: …", "Phone: …", profile tables) are replaced with `[REDACTED]`, and emails, phone numbers, card and ID numbers and greeting names are replaced with placeholders such as `[EMAIL]`. In visual mode the same areas, and every sensitive form field, are filled black in the screenshot before it goes to the local vision model, and the vision model's description is cleaned the same way.
@@ -20,4 +21,4 @@ Before anything is sent, personal values in the page text ("Name: …", "Phone: 
 - Access to `127.0.0.1:11434` / `localhost:11434`: your local Ollama.
 - All-sites access (optional): requested only if you turn on visual mode, because Chrome allows screenshots only with it.
 
-**No analytics, no remote servers, no third parties.**
+**No analytics, no ads, no selling of data.** In Local mode no remote server is contacted. In Cloud mode, Cloudflare processes the sanitized request to run the model (see Cloudflare's privacy policy).

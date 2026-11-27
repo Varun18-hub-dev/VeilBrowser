@@ -94,7 +94,7 @@ try:
                         pg.close()
                 return {"status": "HARNESS_ERROR", "result": str(e).splitlines()[0]}
 
-        def _run_ui(site, tab_id, task, provider="qwen", visual=False, confirm=None, shot=None, expect_access=False):
+        def _run_ui(site, tab_id, task, provider="qwen", visual=False, confirm=None, shot=None, expect_access=False, cloud_vision=False):
             """Type the task into the real side panel, click Run, answer prompts, return what the user sees."""
             # Open the panel in its own window, like the real side panel, so the site stays the visible tab.
             url = f"chrome-extension://{ext_id}/sidepanel.html?tabId={tab_id}"
@@ -104,6 +104,7 @@ try:
             panel.wait_for_load_state()
             panel.set_viewport_size({"width": 380, "height": 900})
             panel.wait_for_timeout(300)
+            provider = {"qwen": "local", "mock": "mock", "cloud": "cloud"}[provider]
             panel.evaluate(
                 """([provider, visual]) => {
                     window.__done = null; window.__status = [];
@@ -111,12 +112,18 @@ try:
                         if (m.type === 'AGENT_TASK_COMPLETED') window.__done = m.payload;
                         if (m.type === 'AGENT_STATUS_UPDATE') window.__status.push(m.currentStep);
                     });
+                    const u = document.getElementById('cloud-url'); u.value = 'http://127.0.0.1:11434'; u.dispatchEvent(new Event('change'));
                     const s = document.getElementById('provider'); s.value = provider; s.dispatchEvent(new Event('change'));
                 }""",
                 [provider, visual],
             )
-            if visual:  # a real click: Chrome only grants permissions during a user gesture
+            if cloud_vision:
+                panel.on("dialog", lambda d: d.accept())
                 panel.click("details.settings summary")
+                panel.check("#cloud-vision")
+            if visual:  # a real click: Chrome only grants permissions during a user gesture
+                if not cloud_vision:
+                    panel.click("details.settings summary")
                 panel.check("#visual")
                 panel.wait_for_timeout(300)
                 if not panel.is_checked("#visual"):
@@ -256,6 +263,28 @@ try:
         R["6_mark_mapped_to_element_id"] = "[vb-" in last_prompt
         R["6_vision_pii_removed"] = not any(x in last_prompt for x in ["ajay.kumar@example.edu", "98450 12345"])
 
+        # 10. Cloud mode: same tasks through the cloud server (stand-in for the Cloudflare Worker).
+        before = len(log_entries())
+        R["10_cloud_attendance"] = run_ui(portal, portal_tab, "Check my attendance", provider="cloud")
+        cloud_new = [e for e in log_entries()[before:] if e.get("cloud")]
+        R["10_cloud_requests"] = len(cloud_new)
+        R["10_cloud_origin_ok"] = all((e.get("origin") or "").startswith("chrome-extension://") for e in cloud_new) and bool(cloud_new)
+        R["10_cloud_install_id"] = all(len(e.get("install") or "") >= 16 for e in cloud_new) and bool(cloud_new)
+        R["10_cloud_no_vision_without_opt_in"] = not any(e.get("kind") == "vision" for e in cloud_new)
+        before = len(log_entries())
+        R["11_cloud_vision"] = run_ui(portal, portal_tab, "Check my attendance", provider="cloud", visual=True, cloud_vision=True)
+        cv = [e for e in log_entries()[before:] if e.get("cloud") and e.get("kind") == "vision"]
+        R["11_cloud_vision_calls"] = len(cv)
+        if cv:
+            img = Image.open(cv[0]["image"]).convert("L")
+            sx = img.width / portal.evaluate("innerWidth")
+            cells = portal.evaluate("""[...document.querySelectorAll('.card:first-of-type tr')].slice(0, 3).map(tr => {
+                const r = tr.children[1].getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom]; })""")
+            def mean2(box):
+                l, t, r_, b = [int(v * sx) for v in box]
+                px = list(img.crop((l + 2, t + 2, r_ - 2, b - 2)).getdata())
+                return sum(px) / max(1, len(px))
+            R["11_cloud_screenshot_personal_cells"] = [round(mean2(c)) for c in cells]
         ctx.close()
 finally:
     for pr in procs:
@@ -283,6 +312,10 @@ checks = {
     "outbound PII is 0 in every run": all(r.get("outboundPii") in (0, None) for r in runs),
     "web page cannot drive the agent": not R.get("8_hostile_page_toggle_changed") and R.get("8_messages_seen_by_page") == [],
     "chrome:// pages refused": "regular website" in R.get("9_chrome_page", ""),
+    "cloud mode answered via the cloud server": "82%" in R.get("10_cloud_attendance", {}).get("result", "") and R.get("10_cloud_requests", 0) >= 1,
+    "cloud requests carry the extension origin and an install id": bool(R.get("10_cloud_origin_ok") and R.get("10_cloud_install_id")),
+    "no screenshot goes to the cloud without opt-in": bool(R.get("10_cloud_no_vision_without_opt_in")),
+    "cloud vision after opt-in gets a blacked-out screenshot": R.get("11_cloud_vision_calls", 0) >= 1 and max(R.get("11_cloud_screenshot_personal_cells", [255])) < 20,
 }
 print()
 for name, ok in checks.items():

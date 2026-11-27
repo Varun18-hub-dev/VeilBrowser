@@ -1,0 +1,29 @@
+name = "veilbrowse-cloud"
+main = "src/index.js"
+compatibility_date = "2026-11-01"
+
+[ai]
+binding = "AI"
+
+[vars]
+# Comma-separated extension origins allowed to call this Worker.
+# Find your id on chrome://extensions (unpacked) and later the Web Store id.
+ALLOWED_ORIGINS = "chrome-extension://REPLACE_WITH_EXTENSION_ID"
+TEXT_MODEL = "@cf/google/gemma-4-26b-a4b-it"
+VISION_MODEL = "@cf/google/gemma-4-26b-a4b-it"
+ALLOW_VISION = "true"
+DAILY_LIMIT_PER_INSTALL = "40"
+
+# Per-minute limit per install (Workers Rate Limiting).
+[[ratelimits]]
+name = "RATE_LIMITER"
+namespace_id = "1001"
+  [ratelimits.simple]
+  limit = 8
+  period = 60
+
+# Per-day limit per install. Create with: npx wrangler kv namespace create USAGE
+# then paste the id below and uncomment.
+# [[kv_namespaces]]
+# binding = "USAGE"
+# id = "REPLACE_WITH_KV_ID"

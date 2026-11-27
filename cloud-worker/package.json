@@ -1,0 +1,10 @@
+{
+  "name": "veilbrowse-cloud-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test.mjs",
+    "dev": "npx wrangler dev",
+    "deploy": "npx wrangler deploy"
+  }
+}

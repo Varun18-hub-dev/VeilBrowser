@@ -13,3 +13,7 @@ apps/extension/veilbrowse-*.zip
 
 # Chrome for Testing downloaded by @puppeteer/browsers
 chrome/
+
+# Cloudflare Worker local state
+cloud-worker/.wrangler/
+cloud-worker/node_modules/

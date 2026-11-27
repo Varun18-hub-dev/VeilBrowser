@@ -67,9 +67,37 @@ class H(BaseHTTPRequestHandler):
     def log_message(self, *a):
         pass
 
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", self.headers.get("Origin", "*"))
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, X-VeilBrowse-Install")
+        self.end_headers()
+
+    def cloud(self, body):
+        """Stand-in for the VeilBrowse Cloudflare Worker (POST /v1/chat)."""
+        entry = {"cloud": True, "kind": body.get("kind"), "origin": self.headers.get("Origin"),
+                 "install": self.headers.get("X-VeilBrowse-Install"), "messages": body.get("messages")}
+        if body.get("kind") == "vision":
+            n = len([f for f in os.listdir(SHOTS) if f.startswith("vision_")])
+            path = os.path.join(SHOTS, f"vision_{n}.jpg")
+            open(path, "wb").write(base64.b64decode(body["image"]))
+            entry.update({"vision": True, "model": "cloud", "image": path})
+            content = "A student portal. The navigation link [1] is at the top. It shows ajay.kumar@example.edu."
+        else:
+            content = json.dumps(decide(body["messages"][-1]["content"]))
+        LOG.write(json.dumps(entry) + "\n"); LOG.flush()
+        out = json.dumps({"ok": True, "content": content}).encode()
+        self.send_response(200)
+        self.send_header("Content-Type", "application/json")
+        self.send_header("Access-Control-Allow-Origin", self.headers.get("Origin", "*"))
+        self.end_headers()
+        self.wfile.write(out)
+
     def do_POST(self):
         raw = self.rfile.read(int(self.headers["Content-Length"]))
         body = json.loads(raw)
+        if self.path == "/v1/chat":
+            return self.cloud(body)
         msg = body["messages"][-1]
         if UPSTREAM:
             if msg.get("images"):

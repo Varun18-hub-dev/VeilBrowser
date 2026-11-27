@@ -67,13 +67,54 @@ async function saveSessions(): Promise<void> {
 async function getSettings(): Promise<VeilBrowseSettings> {
   try {
     const s = (await chrome.storage.local.get(SETTINGS_KEY))[SETTINGS_KEY] as Partial<VeilBrowseSettings> | undefined;
+    // https only, except a local dev server (wrangler dev / tests) on localhost.
+    const cloudUrl = typeof s?.cloudUrl === 'string' && /^(https:\/\/[^\s/]+|http:\/\/(localhost|127\.0\.0\.1)(:\d+)?)(\/[^\s]*)?$/.test(s.cloudUrl.trim()) ? s.cloudUrl.trim().replace(/\/+$/, '') : DEFAULT_SETTINGS.cloudUrl;
     return {
+      backend: s?.backend === 'cloud' ? 'cloud' : 'local',
+      cloudUrl,
+      cloudVision: s?.cloudVision === true,
       textModel: s?.textModel && MODEL_NAME.test(s.textModel) ? s.textModel : DEFAULT_SETTINGS.textModel,
       visionModel: s?.visionModel && MODEL_NAME.test(s.visionModel) ? s.visionModel : DEFAULT_SETTINGS.visionModel,
       timeoutSec: typeof s?.timeoutSec === 'number' && s.timeoutSec >= 30 && s.timeoutSec <= 3600 ? s.timeoutSec : DEFAULT_SETTINGS.timeoutSec,
     };
   } catch {
     return DEFAULT_SETTINGS;
+  }
+}
+
+/** Random per-install id, used only for the cloud server's per-user rate limit. */
+async function installId(): Promise<string> {
+  const k = 'veilbrowse.install';
+  const got = (await chrome.storage.local.get(k))[k];
+  if (typeof got === 'string') return got;
+  const id = crypto.randomUUID();
+  await chrome.storage.local.set({ [k]: id });
+  return id;
+}
+
+/** Call the VeilBrowse cloud Worker. Only sanitized context (and, if allowed, a blacked-out screenshot) is sent. */
+async function cloudChat(
+  settings: VeilBrowseSettings,
+  body: { kind: 'text' | 'vision'; messages: unknown[]; format?: unknown; image?: string }
+): Promise<LlmChatResponse> {
+  if (!settings.cloudUrl) return { ok: false, error: 'No cloud server is set. Add the Cloud URL in Settings, or switch to Local.' };
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), 120_000);
+  try {
+    const res = await fetch(`${settings.cloudUrl}/v1/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-VeilBrowse-Install': await installId() },
+      body: JSON.stringify(body),
+      signal: controller.signal,
+    });
+    const data = (await res.json().catch(() => ({}))) as { ok?: boolean; content?: string; error?: string };
+    if (!res.ok || !data.ok || !data.content) return { ok: false, error: data.error || `Cloud server error (HTTP ${res.status})` };
+    return { ok: true, content: data.content };
+  } catch (err) {
+    const aborted = err instanceof Error && err.name === 'AbortError';
+    return { ok: false, error: aborted ? 'The cloud model timed out' : 'Could not reach the VeilBrowse cloud server' };
+  } finally {
+    clearTimeout(timer);
   }
 }
 
@@ -216,8 +257,13 @@ async function proxyLlmChat(message: LlmChatRequestMessage): Promise<LlmChatResp
     return { ok: false, error: 'Invalid model request' };
   }
   const schema = format && typeof format === 'object' && JSON.stringify(format).length < 4000 ? format : 'json';
+  const settings = await getSettings();
+  if (settings.backend === 'cloud') {
+    // Only the sanitized prompt is sent; the server chooses its own model.
+    return cloudChat(settings, { kind: 'text', messages, ...(typeof schema === 'object' ? { format: schema } : {}) });
+  }
   // Short JSON answers; keep the model loaded between steps. CPU-only machines can take minutes per call.
-  const { timeoutSec } = await getSettings();
+  const { timeoutSec } = settings;
   return ollamaChat({ model, messages, format: schema, keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, timeoutSec * 1000);
 }
 
@@ -287,6 +333,11 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
 
   const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
   const image = toBase64(await blob.arrayBuffer());
+  const settings = await getSettings();
+  if (settings.backend === 'cloud' && settings.cloudVision) {
+    // The user opted in: the screenshot (sensitive areas already black) goes to the cloud vision model.
+    return cloudChat(settings, { kind: 'vision', messages: [{ role: 'user', content: VISION_PROMPT(req.task) }], image });
+  }
   return ollamaChat(
     { model: req.model, messages: [{ role: 'user', content: VISION_PROMPT(req.task), images: [image] }], keep_alive: '30m', options: { temperature: 0.1, num_predict: 300 } },
     (await getSettings()).timeoutSec * 1000

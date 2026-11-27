@@ -20,6 +20,9 @@ const visualToggle = $<HTMLInputElement>('visual');
 const textModel = $<HTMLInputElement>('text-model');
 const visionModel = $<HTMLInputElement>('vision-model');
 const timeoutInput = $<HTMLInputElement>('timeout');
+const cloudUrl = $<HTMLInputElement>('cloud-url');
+const cloudVision = $<HTMLInputElement>('cloud-vision');
+const footer = $<HTMLDivElement>('footer');
 
 type Stage = 'understand' | 'inspect' | 'protect' | 'execute';
 const STAGES: Stage[] = ['understand', 'inspect', 'protect', 'execute'];
@@ -38,21 +41,45 @@ void chrome.storage.local.get([SETTINGS_KEY, PREFS_KEY]).then((s) => {
   textModel.value = settings.textModel;
   visionModel.value = settings.visionModel;
   timeoutInput.value = String(settings.timeoutSec);
+  cloudUrl.value = settings.cloudUrl;
+  cloudVision.checked = settings.cloudVision === true;
   const prefs = s[PREFS_KEY] ?? {};
-  if (prefs.provider === 'mock' || prefs.provider === 'qwen') providerSelect.value = prefs.provider;
+  providerSelect.value = prefs.provider === 'mock' ? 'mock' : settings.backend === 'cloud' ? 'cloud' : 'local';
   visualToggle.checked = prefs.visual === true;
+  updateEngineView();
 });
+
+function updateEngineView(): void {
+  const cloud = providerSelect.value === 'cloud';
+  $('cloud-url-row').classList.toggle('hidden', !cloud);
+  $('cloud-vision-row').classList.toggle('hidden', !cloud);
+  footer.textContent = cloud
+    ? 'Personal data is removed before anything is sent · Cloud AI'
+    : providerSelect.value === 'mock'
+      ? 'Offline demo · nothing is sent anywhere'
+      : 'Your personal data stays in the browser · Local AI';
+}
 function saveSettings(): void {
   void chrome.storage.local.set({
     [SETTINGS_KEY]: {
+      backend: providerSelect.value === 'cloud' ? 'cloud' : 'local',
+      cloudUrl: cloudUrl.value.trim(),
+      cloudVision: cloudVision.checked,
       textModel: textModel.value.trim() || DEFAULT_SETTINGS.textModel,
       visionModel: visionModel.value.trim() || DEFAULT_SETTINGS.visionModel,
       timeoutSec: Math.min(3600, Math.max(30, Number(timeoutInput.value) || DEFAULT_SETTINGS.timeoutSec)),
     },
     [PREFS_KEY]: { provider: providerSelect.value, visual: visualToggle.checked },
   });
+  updateEngineView();
 }
-for (const el of [textModel, visionModel, timeoutInput, providerSelect]) el.addEventListener('change', saveSettings);
+for (const el of [textModel, visionModel, timeoutInput, providerSelect, cloudUrl]) el.addEventListener('change', saveSettings);
+cloudVision.addEventListener('change', () => {
+  if (cloudVision.checked && !confirm('Cloud vision sends a screenshot of the page to the VeilBrowse server. Sensitive fields and personal values are blacked out first, but other visible content is sent. Turn it on?')) {
+    cloudVision.checked = false;
+  }
+  saveSettings();
+});
 
 // Screenshots need Chrome's "all sites" permission; ask only when the user turns visual mode on.
 visualToggle.addEventListener('change', () => {
@@ -175,6 +202,7 @@ async function startTask(tabId: number, task: string): Promise<void> {
       type: 'RUN_AGENT_TASK_FROM_PANEL',
       targetTabId: tabId,
       payload: { task, provider: providerSelect.value === 'mock' ? 'mock' : 'qwen', visual: visualToggle.checked },
+      // backend (local/cloud) is read from settings by the background worker
     })) as { ok?: boolean; error?: string } | undefined;
     if (!response) throw new Error('No reply from the VeilBrowse background worker. Reload the extension on chrome://extensions and refresh the page.');
     if (!response.ok) throw new Error(response.error || 'VeilBrowse could not start on this page.');
