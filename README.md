@@ -243,16 +243,18 @@ npm run build:extension          # development build -> apps/extension/dist
 3. Open any website, type a task, click **Run Agent**. The first time on a site, Chrome asks to allow VeilBrowse on that site only.
 
 ### Let the extension reach Ollama
-The background worker calls `http://127.0.0.1:11434`. Recent Ollama versions accept extension origins by default. If the side panel says *Ollama refused the request*, allow the extension origin and restart Ollama:
+The background worker calls `http://127.0.0.1:11434`. Ollama blocks browser-extension origins by default (checked on Ollama 0.40), so allow them once and restart Ollama:
 
 ```bash
-# Windows (then quit Ollama from the tray and start it again)
+# Windows (PowerShell), then quit Ollama from the tray and start it again
 setx OLLAMA_ORIGINS "chrome-extension://*"
 # macOS
 launchctl setenv OLLAMA_ORIGINS "chrome-extension://*"
 # Linux
 OLLAMA_ORIGINS="chrome-extension://*" ollama serve
 ```
+Without this, the side panel shows *Ollama refused the request*.
+
 No Ollama? Pick **Rule-based (offline demo)** under Settings. Model names can also be changed there.
 
 ### Try it on the demo page
@@ -288,10 +290,10 @@ python apps/extension/e2e/run_e2e.py --chrome "<path to Chrome for Testing or Ch
 
 **With the real models:** run Ollama on another port and let the harness proxy and log it. The same privacy checks then run against real Qwen output, and the task checks measure whether the model actually solves them:
 ```bash
-OLLAMA_HOST=127.0.0.1:11435 ollama serve          # Windows: set OLLAMA_HOST=127.0.0.1:11435 && ollama serve
+OLLAMA_HOST=127.0.0.1:11435 ollama serve          # PowerShell: $env:OLLAMA_HOST="127.0.0.1:11435"; ollama serve
 python apps/extension/e2e/run_e2e.py --chrome "<chrome>" --real-ollama http://127.0.0.1:11435
 ```
-Branded Chrome 137+ ignores `--load-extension`, so use Chrome for Testing or Chromium.
+Quit the Ollama tray app first: the harness needs port 11434 for its logging proxy. Branded Chrome 137+ ignores `--load-extension`; get Chrome for Testing with `npx @puppeteer/browsers install chrome@stable`.
 
 ### Package for the Chrome Web Store
 ```bash
