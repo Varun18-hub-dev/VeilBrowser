@@ -40,6 +40,8 @@ export interface SanitizedElement {
   accessibleLabel: string | null;
   interactable: boolean;
   bounds: ElementBounds;
+  /** Toggle state; present only for ALLOWED (non-sensitive) controls. */
+  state?: import('./dom').ElementState;
 }
 
 /**

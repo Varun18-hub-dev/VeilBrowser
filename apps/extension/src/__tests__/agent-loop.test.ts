@@ -185,3 +185,17 @@ describe('Ollama provider', () => {
     expect(sent).toContain('Signed in as [EMAIL]');
   });
 });
+
+describe('toggle state', () => {
+  it('is shown to the model for normal controls and hidden for sensitive ones', () => {
+    const toggle = { ...el('t', 'Enable email notifications'), role: 'checkbox', state: { checked: true } } as ScannedElement;
+    const secret = { ...el('s', 'I have a medical condition', SensitiveElementType.UNKNOWN), state: { checked: true } } as ScannedElement;
+    const ctx = runPrivacyFirewall(scan([toggle, secret]), null);
+    expect(ctx.elements.find((e) => e.elementId === 't')?.state).toEqual({ checked: true });
+    expect(ctx.elements.find((e) => e.elementId === 's')?.state).toBeUndefined();
+    const lines = new OllamaReasoningProvider({ transport: async () => '' }).formatElements(ctx);
+    expect(lines).toContain('t | checkbox | "Enable email notifications" checked=true');
+    expect(lines).toContain('1 private fields hidden');
+    expect(lines).not.toContain('medical');
+  });
+});

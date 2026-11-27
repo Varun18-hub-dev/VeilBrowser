@@ -116,6 +116,7 @@ export function prepareSanitizedContext(
       maskToken: policy.maskToken,
       accessibleLabel,
       interactable: Boolean(element.interactable),
+      ...(policy.decision === 'ALLOWED' && element.state ? { state: { ...element.state } } : {}),
       bounds: {
         x: element.bounds?.x ?? 0,
         y: element.bounds?.y ?? 0,

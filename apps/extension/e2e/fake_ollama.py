@@ -7,7 +7,7 @@ deliberately contain personal data and a box number, to check the guard and mark
 Every request is logged so the test can check what the models were shown.
 """
 import base64, json, os, re, sys, urllib.request
-from http.server import BaseHTTPRequestHandler, HTTPServer
+from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 LOG = open(sys.argv[1], "a")
 SHOTS = sys.argv[2] if len(sys.argv) > 2 else os.path.dirname(sys.argv[1])
@@ -17,7 +17,7 @@ UPSTREAM = sys.argv[3] if len(sys.argv) > 3 else None
 
 def forward(raw):
     req = urllib.request.Request(UPSTREAM + "/api/chat", data=raw, headers={"Content-Type": "application/json"})
-    with urllib.request.urlopen(req, timeout=300) as r:
+    with urllib.request.urlopen(req, timeout=900) as r:
         return json.loads(r.read())["message"]["content"]
 
 
@@ -29,7 +29,11 @@ def section(text, name):
 def decide(user):
     task = re.search(r'User task: "(.*?)"', user).group(1).lower()
     history = section(user, "Actions taken so far")
-    els = json.loads(section(user, "Interactive elements"))
+    els = []
+    for line in section(user, r"Interactive elements \(id \| role \| label \| state\)").splitlines():
+        m = re.match(r'(\S+) \| (\S+) \| "(.*)"', line)
+        if m:
+            els.append({"id": m.group(1), "role": m.group(2), "label": m.group(3), "decision": "ALLOWED"})
     text = section(user, "Visible page text")
     allowed = [e for e in els if e["decision"] == "ALLOWED"]
     find = lambda w: next((e for e in allowed if w in (e.get("label") or "").lower()), None)
@@ -97,4 +101,4 @@ class H(BaseHTTPRequestHandler):
         self.wfile.write(out)
 
 
-HTTPServer(("127.0.0.1", 11434), H).serve_forever()
+ThreadingHTTPServer(("127.0.0.1", 11434), H).serve_forever()

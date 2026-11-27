@@ -214,7 +214,8 @@ async function proxyLlmChat(message: LlmChatRequestMessage): Promise<LlmChatResp
   if (typeof model !== 'string' || !MODEL_NAME.test(model) || !Array.isArray(messages)) {
     return { ok: false, error: 'Invalid model request' };
   }
-  return ollamaChat({ model, messages, format: 'json', options: { temperature: 0.1 } }, 90_000);
+  // Short JSON answers; keep the model loaded between steps. CPU-only machines can take minutes per call.
+  return ollamaChat({ model, messages, format: 'json', keep_alive: '30m', options: { temperature: 0.1, num_predict: 200, num_ctx: 4096 } }, 240_000);
 }
 
 // ---------------------------------------------------------------- visual perception
@@ -284,8 +285,8 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
   const blob = await canvas.convertToBlob({ type: 'image/jpeg', quality: 0.85 });
   const image = toBase64(await blob.arrayBuffer());
   return ollamaChat(
-    { model: req.model, messages: [{ role: 'user', content: VISION_PROMPT(req.task), images: [image] }], options: { temperature: 0.1 } },
-    120_000
+    { model: req.model, messages: [{ role: 'user', content: VISION_PROMPT(req.task), images: [image] }], keep_alive: '30m', options: { temperature: 0.1, num_predict: 300 } },
+    300_000
   );
 }
 

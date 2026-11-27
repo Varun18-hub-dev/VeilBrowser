@@ -46,9 +46,10 @@ const SYSTEM_PROMPT =
   '  {"action": "WAIT", "durationMs": 1000}\n' +
   '  {"action": "NAVIGATE", "url": "https://..."}\n' +
   '  {"done": true, "summary": "<what was done, or the answer the user asked for>"}\n' +
-  'Rules: only use ids from the element list; never target elements whose decision is not ALLOWED; ' +
-  'if the task asks a question, read the page text and answer it in the summary; ' +
-  'if the previous actions already achieved the task, finish.';
+  'Rules: only use ids from the element list; ' +
+  'if the task asks a question and the answer is in the page text, answer it in the summary right away; ' +
+  'check the state column (checked=true means a setting is already on) and the actions taken so far: ' +
+  'if the task is already achieved, finish. Never repeat an action that already succeeded.';
 
 /**
  * OllamaReasoningProvider — local LLM (default Qwen 2.5 3B) through Ollama.
@@ -69,20 +70,24 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
     this.transport = options?.transport ?? fetchTransport(endpoint);
   }
 
-  /** Compact, privacy-safe element list for the prompt. */
-  public formatElements(context: UnifiedSanitizedContext): string {
-    return JSON.stringify(
-      context.elements
-        .filter((e) => e.interactable || e.decision === 'ALLOWED')
-        .map((e) => ({
-          id: e.elementId,
-          tag: e.tagName,
-          role: e.role,
-          label: e.accessibleLabel || undefined,
-          category: e.category,
-          decision: e.decision,
-        }))
-    );
+  /** Compact, privacy-safe element list: one line per element, sized for a 4k context. */
+  public formatElements(context: UnifiedSanitizedContext, max = 45): string {
+    const lines: string[] = [];
+    let masked = 0;
+    for (const e of context.elements) {
+      if (e.decision !== 'ALLOWED') {
+        masked++;
+        continue;
+      }
+      if (!e.interactable || lines.length >= max) continue;
+      const label = (e.accessibleLabel ?? '').replace(/\s+/g, ' ').slice(0, 60);
+      const st = e.state
+        ? ' ' + Object.entries(e.state).map(([k, v]) => `${k}=${v}`).join(' ')
+        : '';
+      lines.push(`${e.elementId} | ${e.role ?? e.tagName} | "${label}"${st}`);
+    }
+    if (masked) lines.push(`(${masked} private fields hidden; do not use them)`);
+    return lines.join('\n');
   }
 
   public buildMessages(task: string, context: UnifiedSanitizedContext, history: StepRecord[], observation?: Observation): ChatMessage[] {
@@ -94,7 +99,8 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
           })
           .join('\n')
       : 'none yet';
-    const text = observation?.pageText?.length ? observation.pageText.join('\n') : '(no readable text)';
+    let text = observation?.pageText?.length ? observation.pageText.join('\n') : '(no readable text)';
+    if (text.length > 2500) text = text.slice(0, 2500) + '\n…';
     const visual = observation?.visualNotes ? `\n\nVision model notes about the screenshot:\n${observation.visualNotes}` : '';
     return [
       { role: 'system', content: SYSTEM_PROMPT },
@@ -103,7 +109,7 @@ export class OllamaReasoningProvider implements ReasoningProvider, StepProvider 
         content:
           `User task: "${task}"\n\nActions taken so far:\n${past}\n\n` +
           `Page: "${context.pageTitle}"\n\nVisible page text:\n${text}${visual}\n\n` +
-          `Interactive elements:\n${this.formatElements(context)}\n\nNext step (JSON only):`,
+          `Interactive elements (id | role | label | state):\n${this.formatElements(context)}\n\nNext step (JSON only):`,
       },
     ];
   }

@@ -49,6 +49,20 @@ export interface ScannedElement {
   sensitivity: SensitivityClassification;
   /** Whether this element resides inside an open Shadow DOM root */
   inShadowRoot?: boolean;
+  /**
+   * On/off state of toggles (checkbox, radio, switch, aria-checked/pressed/expanded).
+   * Not a typed value. Only forwarded for non-sensitive controls, so the agent can tell
+   * whether a setting is already on.
+   */
+  state?: ElementState;
+}
+
+export interface ElementState {
+  checked?: boolean;
+  expanded?: boolean;
+  pressed?: boolean;
+  selected?: boolean;
+  disabled?: boolean;
 }
 
 /**

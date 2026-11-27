@@ -297,6 +297,8 @@ export function scanElement(
   };
 
   if (inShadowRoot) result.inShadowRoot = true;
+  const state = getToggleState(element, tagName, inputType);
+  if (state) result.state = state;
 
   return result;
 }
@@ -643,4 +645,23 @@ export class PageScanner {
     }
     this.onUpdate?.(this.buildScanResult());
   }
+}
+
+/** On/off state of toggles. Never a typed value. */
+function getToggleState(element: HTMLElement, tagName: string, inputType: string | undefined): ScannedElement['state'] | undefined {
+  const st: NonNullable<ScannedElement['state']> = {};
+  const aria = (name: string) => {
+    const v = element.getAttribute(name);
+    return v === 'true' ? true : v === 'false' ? false : undefined;
+  };
+  if (tagName === 'input' && (inputType === 'checkbox' || inputType === 'radio')) {
+    st.checked = (element as HTMLInputElement).checked;
+  } else if (aria('aria-checked') !== undefined) {
+    st.checked = aria('aria-checked');
+  }
+  if (aria('aria-expanded') !== undefined) st.expanded = aria('aria-expanded');
+  if (aria('aria-pressed') !== undefined) st.pressed = aria('aria-pressed');
+  if (aria('aria-selected') !== undefined) st.selected = aria('aria-selected');
+  if ((element as HTMLButtonElement).disabled === true || aria('aria-disabled') === true) st.disabled = true;
+  return Object.keys(st).length ? st : undefined;
 }

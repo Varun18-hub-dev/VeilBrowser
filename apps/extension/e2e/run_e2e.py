@@ -126,7 +126,7 @@ try:
             panel.fill("#task", task)
             panel.click("#run")
             if expect_access:
-                panel.wait_for_selector("#access:not(.hidden)", timeout=30000)
+                panel.wait_for_selector("#access:not(.hidden)", timeout=900000 if args.real_ollama else 30000)
                 out = {"access_prompt": panel.inner_text("#access-text")}
                 if shot:
                     panel.screenshot(path=os.path.join(SHOTS, shot))
@@ -137,15 +137,15 @@ try:
                 return out
             if confirm is not None:
                 try:
-                    panel.wait_for_selector("#confirm:not(.hidden)", timeout=300000 if args.real_ollama else 30000)
+                    panel.wait_for_selector("#confirm:not(.hidden)", timeout=900000 if args.real_ollama else 30000)
                 except Exception:
-                    panel.wait_for_selector("#result:not(.hidden)", timeout=300000)
+                    panel.wait_for_selector("#result:not(.hidden)", timeout=900000)
                     out = {"status": "NO_CONFIRMATION", "result": panel.inner_text("#result")}
                     panel.close()
                     return out
                 prompt = panel.inner_text("#confirm-text")
                 panel.click("#approve" if confirm else "#deny")
-            panel.wait_for_selector("#result:not(.hidden)", timeout=600000 if args.real_ollama else 90000)
+            panel.wait_for_selector("#result:not(.hidden)", timeout=1800000 if args.real_ollama else 90000)
             done = panel.evaluate("window.__done") or {}
             out = {
                 "status": done.get("status"),
