@@ -77,6 +77,8 @@ export interface LoopDeps {
   /** Total step budget for the whole task, across pages. */
   maxSteps?: number;
   settleMs?: number;
+  /** How many rejected actions the model may correct before the run is blocked. */
+  maxCorrections?: number;
 }
 
 function isSameAction(raw: unknown, prev: StepRecord): boolean {
@@ -105,6 +107,10 @@ export async function runAgentLoop(deps: LoopDeps): Promise<LoopResult> {
   const settleMs = deps.settleMs ?? 700;
   const steps: StepRecord[] = [...(deps.history ?? [])];
   let piiMasked = deps.piiMaskedSoFar ?? 0;
+  // Rejected actions are never executed. The model is told why and may try again a few times.
+  const maxCorrections = deps.maxCorrections ?? 2;
+  let corrections = 0;
+  let pendingFeedback: string | undefined;
 
   const finish = (status: LoopStatus, summary: string, residualPii = 0): LoopResult => ({
     status,
@@ -169,7 +175,8 @@ export async function runAgentLoop(deps: LoopDeps): Promise<LoopResult> {
     deps.emit({ type: 'AGENT_STATUS_UPDATE', status: 'REASONING', step: i, currentStep: 'Deciding the next step' });
     let next: AgentStep;
     try {
-      next = await deps.provider.nextStep(deps.task, context, steps, observation);
+      next = await deps.provider.nextStep(deps.task, context, steps, pendingFeedback ? { ...observation, feedback: pendingFeedback } : observation);
+      pendingFeedback = undefined;
       // Repeat guard: an action identical to the last successful one on this page is not run.
       // The model is told once that it already worked and asked again.
       const prev = [...steps].reverse().find((s) => s.outcome === 'EXECUTED');
@@ -200,6 +207,11 @@ export async function runAgentLoop(deps: LoopDeps): Promise<LoopResult> {
     const schema = validateActionSchema(next.action);
     if (!schema.valid || !schema.action) {
       steps.push({ step: i, action: String((next.action as { action?: unknown })?.action ?? 'UNKNOWN'), outcome: 'REJECTED', detail: schema.errors.join('; ') });
+      if (corrections < maxCorrections) {
+        corrections++;
+        pendingFeedback = `Your last action was rejected and NOT executed: ${schema.errors.join('; ')}. Choose a valid action using an id from the element list, or set done=true.`;
+        continue;
+      }
       return finish('BLOCKED', `The model proposed a forbidden action: ${schema.errors.join('; ')}`);
     }
     let action: AgentAction = schema.action;
@@ -220,6 +232,11 @@ export async function runAgentLoop(deps: LoopDeps): Promise<LoopResult> {
     }
     if (decision.decision !== 'APPROVED') {
       steps.push({ step: i, action: action.action, targetId, targetLabel, text: typed, outcome: 'BLOCKED', detail: decision.reasons.join('; ') });
+      if (corrections < maxCorrections) {
+        corrections++;
+        pendingFeedback = `Your last action was blocked by the safety policy and NOT executed: ${decision.reasons.join('; ')}. Choose a different action, or set done=true.`;
+        continue;
+      }
       return finish('BLOCKED', `Blocked by the safety policy: ${decision.reasons.join('; ')}`);
     }
 

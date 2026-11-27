@@ -255,7 +255,7 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
     return { ok: false, error: `Screenshot failed: ${err instanceof Error ? err.message : String(err)}` };
   }
   const bitmap = await createImageBitmap(await (await fetch(dataUrl)).blob());
-  const outW = Math.min(bitmap.width, 896); // fewer image tokens: much faster on CPU
+  const outW = Math.min(bitmap.width, 768); // fewer image tokens: much faster on CPU
   const k = outW / bitmap.width;
   const canvas = new OffscreenCanvas(outW, Math.round(bitmap.height * k));
   const ctx = canvas.getContext('2d');
@@ -287,7 +287,7 @@ async function visualPerception(req: VisualRequest, windowId: number): Promise<L
   const image = toBase64(await blob.arrayBuffer());
   return ollamaChat(
     { model: req.model, messages: [{ role: 'user', content: VISION_PROMPT(req.task), images: [image] }], keep_alive: '30m', options: { temperature: 0.1, num_predict: 300 } },
-    300_000
+    600_000
   );
 }
 

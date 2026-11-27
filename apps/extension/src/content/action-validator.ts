@@ -138,7 +138,8 @@ export function validateActionSchema(action: unknown): ActionSchemaResult {
 
     case 'SCROLL': {
       const validDirections = ['up', 'down', 'left', 'right'];
-      const dir = typeof raw.direction === 'string' ? raw.direction.toLowerCase() : '';
+      // A missing direction defaults to 'down' (harmless); an invalid one is still rejected.
+      const dir = raw.direction === undefined || raw.direction === '' ? 'down' : typeof raw.direction === 'string' ? raw.direction.toLowerCase() : '';
       if (!validDirections.includes(dir)) {
         return {
           valid: false,

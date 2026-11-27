@@ -311,7 +311,8 @@ Runs of the e2e suite with `--real-ollama` (Qwen 2.5 3B + Qwen 2.5-VL 3B, Ollama
 |---|---|---|---|---|
 | 1 | first real run | 0 / 6 | 4 / 4 | 90 s timeout too short on CPU; timed-out calls kept Ollama busy and every later call timed out; prompts overflowed the 4k context |
 | 2 | toggle state visible, prompt ~700 tokens, 240 s timeout | 2 / 6 (confirm-decline, confirm-approve) | 4 / 4 | model never set "done": clicked the toggle 3 times, re-clicked Search on the results page, re-clicked the Attendance link instead of answering; vision model > 5 min per screenshot |
-| 3 | JSON-schema replies with thought + done first, 3 few-shot examples, repeat guard that feeds back "already succeeded", 896 px screenshots | *pending* | | |
+| 3 | JSON-schema replies with thought + done first, 3 few-shot examples, repeat guard that feeds back "already succeeded", 896 px screenshots | 2 / 6 (notifications task now 1 click + correct summary; confirm-approve) | 4 / 4 | invalid moves ended runs (NAVIGATE with a label as URL, SCROLL with no direction); attendance answer said where the data was, not the values; vision > 5 min |
+| 4 | rejected actions are never run but fed back to the model (up to 2 corrections); SCROLL defaults to down; answers must quote the values; 768 px screenshots, 10 min vision timeout | *pending* | | |
 
 Privacy checks = no personal data in any prompt, outbound PII 0, hostile page cannot drive the agent, `chrome://` refused. They held in every run.
 

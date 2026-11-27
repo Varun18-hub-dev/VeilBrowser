@@ -66,13 +66,14 @@ Rules:
 2. If the task asks for a change and it is already true (e.g. checked=true) or the last action did it, set done=true.
 3. Never repeat an action that already succeeded.
 4. To search: TYPE into the search box with "submit": true, then read the results in the page text.
-5. If the task gives a URL, NAVIGATE to it.
-6. Only use ids from the element list.
+5. Only NAVIGATE when the task gives a URL; the url must start with http:// or https://.
+6. Only use ids from the element list. SCROLL needs "direction": "down" or "up".
+7. When the task asks for information, the answer must state the actual values from the page text (numbers, names, prices), not just say where they are.
 Examples:
 Task: "turn on dark mode". Done so far: CLICK "Dark mode" -> EXECUTED. Element: e5 | checkbox | "Dark mode" checked=true
 {"thought": "Dark mode is now checked, so the task is complete.", "done": true, "answer": "Dark mode is on."}
 Task: "what is my order status". Page text: "Order #123 | Shipped"
-{"thought": "The status is in the page text.", "done": true, "answer": "Your order has shipped."}
+{"thought": "The status is in the page text.", "done": true, "answer": "Order #123 has shipped."}
 Task: "search for headphones". Element: e2 | searchbox | "Search"
 {"thought": "I need to search first.", "done": false, "action": "TYPE", "targetId": "e2", "text": "headphones", "submit": true}`;
 

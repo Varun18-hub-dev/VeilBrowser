@@ -124,7 +124,13 @@ try:
             panel.fill("#task", task)
             panel.click("#run")
             if expect_access:
-                panel.wait_for_selector("#access:not(.hidden)", timeout=900000 if args.real_ollama else 30000)
+                # Either the access prompt appears, or the run ends without it (then record why).
+                panel.wait_for_selector("#access:not(.hidden), #result:not(.hidden)", timeout=1800000 if args.real_ollama else 30000)
+                if not panel.is_visible("#access"):
+                    out = {"access_prompt": "", "status": "NO_ACCESS_PROMPT", "result": panel.inner_text("#result"),
+                           "steps": panel.evaluate("[...document.querySelectorAll('#steps li')].map(li => li.textContent)")}
+                    panel.close()
+                    return out
                 out = {"access_prompt": panel.inner_text("#access-text")}
                 if shot:
                     panel.screenshot(path=os.path.join(SHOTS, shot))

@@ -2,7 +2,7 @@ import { SensitiveElementType, type DomScanResult, type ScannedElement, type Uni
 import { runPrivacyFirewall } from '../content/firewall';
 import { runAgentLoop, type AgentStep, type StepProvider, type StepRecord } from '../content/agent-loop';
 import { guardOutboundContext, scrubText, countResidualPii } from '../content/outbound-guard';
-import { isLikelyDestructiveLabel, validateAction, executeAction } from '../content/action-validator';
+import { isLikelyDestructiveLabel, validateAction, validateActionSchema, executeAction } from '../content/action-validator';
 import { OllamaReasoningProvider } from '../content/ollama-provider';
 
 function el(id: string, label: string, type: SensitiveElementType = SensitiveElementType.NONE, tagName = 'button'): ScannedElement {
@@ -115,13 +115,13 @@ describe('agent loop', () => {
 
   it('blocks a click on a password field', async () => {
     const clicks: string[] = [];
-    const r = await runAgentLoop(deps(new ScriptedProvider([{ done: false, action: { action: 'CLICK', targetId: 'pwd' } }]), page, { clicks }));
+    const r = await runAgentLoop({ ...deps(new ScriptedProvider([{ done: false, action: { action: 'CLICK', targetId: 'pwd' } }]), page, { clicks }), maxCorrections: 0 });
     expect(r.status).toBe('BLOCKED');
     expect(clicks).toEqual([]);
   });
 
   it('rejects actions outside the closed schema', async () => {
-    const r = await runAgentLoop(deps(new ScriptedProvider([{ done: false, action: { action: 'EXECUTE_JS', code: 'x' } }]), page));
+    const r = await runAgentLoop({ ...deps(new ScriptedProvider([{ done: false, action: { action: 'EXECUTE_JS', code: 'x' } }]), page), maxCorrections: 0 });
     expect(r.status).toBe('BLOCKED');
     expect(r.steps[0].outcome).toBe('REJECTED');
   });
@@ -235,5 +235,44 @@ describe('repeat guard (behaviour seen with real Qwen 2.5 3B)', () => {
       action: { action: 'TYPE', targetId: 'e2', text: 'laptop', submit: true },
     });
     expect(OllamaReasoningProvider.parseStep('{"thought":"in the text","done":true,"answer":"82%"}')).toEqual({ done: true, summary: '82%' });
+  });
+});
+
+describe('correcting rejected actions (seen with real Qwen 2.5 3B)', () => {
+  const page = [el('toggle', 'Email notifications'), el('pwd', 'Password', SensitiveElementType.PASSWORD, 'input')];
+
+  it('never executes a rejected action, tells the model why, and lets it recover', async () => {
+    const clicks: string[] = [];
+    const seen: (string | undefined)[] = [];
+    const p: StepProvider = {
+      providerId: 'recovers',
+      nextStep: async (_t, _c, history, obs) => {
+        seen.push(obs?.feedback);
+        if (history.length === 0) return { done: false, action: { action: 'NAVIGATE', url: 'Manage how you receive updates' } };
+        if (history.length === 1) return { done: false, action: { action: 'CLICK', targetId: 'pwd' } };
+        if (history.length === 2) return { done: false, action: { action: 'CLICK', targetId: 'toggle' } };
+        return { done: true, summary: 'Email notifications are on.' };
+      },
+    };
+    const r = await runAgentLoop(deps(p, page, { clicks }));
+    expect(clicks).toEqual(['toggle']);
+    expect(r.steps.map((s) => s.outcome)).toEqual(['BLOCKED', 'BLOCKED', 'EXECUTED']);
+    expect(seen[1]).toMatch(/NOT executed/);
+    expect(seen[2]).toMatch(/safety policy/);
+    expect(r.status).toBe('COMPLETED');
+  });
+
+  it('blocks the run after too many rejected actions', async () => {
+    const clicks: string[] = [];
+    const p: StepProvider = { providerId: 'bad', nextStep: async () => ({ done: false, action: { action: 'CLICK', targetId: 'pwd' } }) };
+    const r = await runAgentLoop(deps(p, page, { clicks }));
+    expect(clicks).toEqual([]);
+    expect(r.status).toBe('BLOCKED');
+    expect(r.steps).toHaveLength(3); // 1 + 2 corrections
+  });
+
+  it('defaults a SCROLL without direction to down', () => {
+    expect(validateActionSchema({ action: 'SCROLL' })).toMatchObject({ valid: true, action: { direction: 'down' } });
+    expect(validateActionSchema({ action: 'SCROLL', direction: 'sideways' }).valid).toBe(false);
   });
 });
