@@ -1,6 +1,5 @@
 // @ts-check
 const path = require('path');
-const webpack = require('webpack');
 const CopyPlugin = require('copy-webpack-plugin');
 
 /**
@@ -58,7 +57,6 @@ module.exports = (_env, argv) => {
   },
 
   plugins: [
-    new webpack.DefinePlugin({ VEILBROWSE_CLOUD_URL: JSON.stringify(process.env.VEILBROWSE_CLOUD_URL || '') }),
     new CopyPlugin({
       patterns: [
         // Copy manifest to dist/ — Chrome loads from dist/

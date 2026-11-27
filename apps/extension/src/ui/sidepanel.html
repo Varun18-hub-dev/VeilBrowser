@@ -56,18 +56,15 @@ details.settings{margin-top:18px;font-size:12px;color:#475569}details.settings s
   <details class="settings">
     <summary>Settings</summary>
     <div class="set">
-      <label>AI engine <select id="provider"><option value="local">Local (Ollama on this computer)</option><option value="cloud">Cloud (VeilBrowse server)</option><option value="mock">Rule-based (offline demo)</option></select></label>
-      <label id="cloud-url-row">Cloud URL <input id="cloud-url" type="text" spellcheck="false" placeholder="https://….workers.dev"></label>
+      <label>Reasoning <select id="provider"><option value="qwen">Local AI model (Ollama)</option><option value="mock">Rule-based (offline demo)</option></select></label>
       <label>Look at the page visually <input id="visual" type="checkbox"></label>
-      <label id="cloud-vision-row">Allow cloud vision <input id="cloud-vision" type="checkbox"></label>
       <label>Text model <input id="text-model" type="text" spellcheck="false"></label>
       <label>Vision model <input id="vision-model" type="text" spellcheck="false"></label>
       <label>Model time limit (s) <input id="timeout" type="text" inputmode="numeric" spellcheck="false"></label>
-      <div class="hint"><b>Local:</b> models run on your computer through Ollama; nothing leaves it. <b>Cloud:</b> faster; only the sanitized page (personal data removed) is sent to the VeilBrowse server. Cloud vision sends the screenshot with private areas blacked out; it is off unless you turn it on.
-      Visual mode sends a screenshot with private areas blacked out to the vision model. Chrome only lets extensions take screenshots with access to all sites, so turning it on asks for that permission.</div>
+      <div class="hint">Models run on your computer through Ollama. Visual mode sends a screenshot with private areas blacked out to the local vision model. Chrome only lets extensions take screenshots with access to all sites, so turning it on asks for that permission.</div>
     </div>
   </details>
-  <div id="footer" class="footer">Your personal data stays in the browser · Local AI</div>
+  <div class="footer">Your personal data stays in the browser · Local AI</div>
 </div>
 <script src="sidepanel.js"></script>
 </body>

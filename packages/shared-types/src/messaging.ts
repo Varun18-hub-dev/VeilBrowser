@@ -71,28 +71,14 @@ export interface RunAgentTaskFromPanelMessage extends VeilBrowseMessage {
   payload: { task: string; provider: ProviderChoice; visual?: boolean };
 }
 
-export type Backend = 'local' | 'cloud';
-
 export interface VeilBrowseSettings {
-  /** Where the reasoning model runs: Ollama on this computer, or the VeilBrowse cloud Worker. */
-  backend: Backend;
-  /** VeilBrowse cloud Worker URL (https://...workers.dev). */
-  cloudUrl: string;
-  /** Allow sending the blacked-out screenshot to the cloud vision model. Off by default. */
-  cloudVision: boolean;
   textModel: string;
   visionModel: string;
   /** Per-call time limit for the local model, in seconds (CPU-only machines need minutes). */
   timeoutSec: number;
 }
 
-declare const VEILBROWSE_CLOUD_URL: string | undefined;
-
 export const DEFAULT_SETTINGS: VeilBrowseSettings = {
-  backend: 'local',
-  // Set at build time: VEILBROWSE_CLOUD_URL=https://... npm run build
-  cloudUrl: typeof VEILBROWSE_CLOUD_URL === 'string' ? VEILBROWSE_CLOUD_URL : '',
-  cloudVision: false,
   textModel: 'qwen2.5:3b',
   visionModel: 'qwen2.5vl:3b',
   timeoutSec: 600,

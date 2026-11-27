@@ -4,7 +4,7 @@ VeilBrowse is a Chrome extension that lets an AI agent use websites for you **wi
 
 - **Perception:** DOM scan of interactive elements, privacy-safe reading of visible page text, and (optional) a screenshot with private areas blacked out, described by a **local vision model** (default `qwen2.5vl:3b`), which also reads text that only exists as images.
 - **Local privacy firewall:** field values are never read; personal values in page text (`Name: Ajay Kumar` → `Name: [REDACTED]`), emails, phones, cards, ID numbers and greeting names are removed before any model sees the page.
-- **Reasoning:** **Qwen 2.5 3B running locally in Ollama** (default, nothing leaves the computer), or **Cloud mode**: a Cloudflare Worker on Workers AI's free tier, which receives only the sanitized context ([`cloud-worker/`](cloud-worker/README.md)). Either way the model picks one structured action at a time: `CLICK`, `TYPE`, `SCROLL`, `WAIT`, `NAVIGATE`, or `done` with an answer.
+- **Reasoning:** **Qwen 2.5 3B running locally in Ollama** picks one structured action at a time: `CLICK`, `TYPE`, `SCROLL`, `WAIT`, `NAVIGATE`, or `done` with an answer.
 - **Validation and execution:** Tier 1 schema check, Tier 2 security check, your approval for anything that deletes, pays, sends or submits; the extension is the only thing that touches the page.
 
 **What is enforced, and where it is tested**
@@ -278,7 +278,7 @@ End-to-end test in a real browser. It loads `dist/` into Chrome and drives the r
 pip install playwright pillow
 python apps/extension/e2e/run_e2e.py --chrome "<path to Chrome for Testing or Chromium>"
 ```
-19 checks, including:
+15 checks, including:
 - the search task types, follows the results page and answers correctly;
 - the attendance task is answered from redacted text;
 - in the screenshot sent to the vision model, the personal fields and the greeting are black and the attendance table is not;
@@ -294,9 +294,6 @@ OLLAMA_HOST=127.0.0.1:11435 ollama serve          # PowerShell: $env:OLLAMA_HOST
 python apps/extension/e2e/run_e2e.py --chrome "<chrome>" --real-ollama http://127.0.0.1:11435
 ```
 Quit the Ollama tray app first: the harness needs port 11434 for its logging proxy. Branded Chrome 137+ ignores `--load-extension`; get Chrome for Testing with `npx @puppeteer/browsers install chrome@stable`.
-
-### Cloud mode (optional)
-Deploy the Worker in [`cloud-worker/`](cloud-worker/README.md), then Settings → AI engine → **Cloud** and paste its URL. Only the sanitized context is sent. Visual mode stays local unless you also tick **Allow cloud vision** (the screenshot, with sensitive areas blacked out, is then sent; you are asked to confirm). The e2e suite checks both: cloud requests carry the extension origin and an install id, no screenshot goes to the cloud without the opt-in, and the cloud screenshot is blacked out.
 
 ### Package for the Chrome Web Store
 ```bash
